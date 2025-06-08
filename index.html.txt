@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jouw Fiets Configurator</title>
+    <!-- Google Fonts - Inter voor mooie typografie -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS voor de configurator en pop-up */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f8fa; /* Zeer lichte blauw/grijs */
+            margin: 0;
+            padding: 0;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 2.5rem;
+            margin: 2rem;
+            border-radius: 18px; /* Nog ronder */
+            box-shadow: 0 12px 35px rgba(0,0,0,0.1); /* Diepere schaduw */
+            max-width: 850px; /* Iets breder */
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 1.8rem; /* Ruimte tussen secties */
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            font-weight: 700;
+            font-size: 2.4rem; /* Grotere titel */
+        }
+
+        h2 {
+            color: #34495e;
+            margin-top: 0;
+            margin-bottom: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            font-size: 1.6rem;
+        }
+
+        .section {
+            background: #ffffff;
+            padding: 1.8rem;
+            border-radius: 15px; /* Consistent ronder */
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08); /* Zachte schaduw */
+            border: 1px solid #e0e6ec; /* Subtiele rand */
+        }
+
+        .config-mode-selector {
+            text-align: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px dashed #e9e9e9; /* Gestippelde lijn */
+            margin-bottom: 2rem;
+            background-color: #f7f9fc; /* Lichte achtergrond */
+        }
+
+        .config-section {
+            display: none; /* Standaard verborgen */
+            animation: fadeIn 0.5s ease-out; /* Fade-in animatie */
+        }
+
+        .config-section.active {
+            display: block; /* Actieve sectie zichtbaar */
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.6rem;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 0.9rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ccddee; /* Zachtere blauwe rand */
+            border-radius: 10px; /* Afgeronde hoeken */
+            box-sizing: border-box;
+            font-size: 1.05rem;
+            transition: all 0.3s ease-in-out;
+            -webkit-appearance: none; /* Verberg standaard dropdown pijl in sommige browsers */
+            -moz-appearance: none;
+            appearance: none;
+            background-color: #fefefe;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007bff%22%20d%3D%22M287%2069.4L146.2%20208.6%205.4%2069.4c-1.6-1.6-3.6-2.4-5.4-2.4c-1.8%200-3.6%200.8-5.4%202.4c-3.2%203.2-3.2%208.2%200%2011.4l141.6%20141.6c1.6%201.6%203.6%202.4%205.4%202.4c1.8%200%203.6-0.8%205.4-2.4L292.4%2080.8c3.2-3.2%203.2-8.2%200-11.4c-3.2-3.2-8.2-3.2-11.4%200z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right .8em top 50%;
+            background-size: .7em auto;
+        }
+
+        select:focus, input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 4px rgba(0,123,255,0.2); /* Zachtere, bredere focus gloed */
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-weight: 700; /* Dikker lettertype */
+            border: none;
+            padding: 1rem 2rem; /* Grotere knoppen */
+            border-radius: 10px; /* Afgeronde hoeken */
+            transition: background-color 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease;
+            box-shadow: 0 6px 15px rgba(0,123,255,0.25);
+            margin-top: 1.5rem; /* Meer ruimte boven knoppen */
+            font-size: 1.1rem;
+        }
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px); /* Meer lift */
+            box-shadow: 0 8px 20px rgba(0,123,255,0.35);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(0,123,255,0.2);
+        }
+
+        .output {
+            margin-top: 1.2rem;
+            font-weight: 600;
+            color: #28a745;
+            text-align: center;
+            padding: 1rem;
+            background-color: #e6ffe6;
+            border-radius: 10px;
+            border: 1px solid #28a745;
+            animation: fadeIn 0.5s ease-out; /* Fade-in voor output */
+        }
+        .output.error {
+            background-color: #ffe6e6;
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+
+        /* Budget sectie styling (AI sectie is verwijderd) */
+        .budget-section {
+            background-color: #f7f9fc;
+            border: 1px solid #e0e6ec;
+        }
+        .budget-section h2 {
+            color: #007bff;
+        }
+        
+        #budgetLoadingIndicator {
+            color: #666;
+            font-style: italic;
+            font-size: 0.9em;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        /* Overzicht van gekozen onderdelen */
+        .build-summary {
+            background-color: #fdfdfd;
+            border: 1px solid #e0e6ec;
+            padding: 1.8rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .build-summary h2 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+        }
+        #selectedPartsSummary {
+            margin-top: 1rem;
+            padding: 0.5rem 0;
+        }
+        #selectedPartsSummary p {
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+            color: #444;
+            line-height: 1.4;
+        }
+        .placeholder-text {
+            font-style: italic;
+            color: #777;
+            text-align: center;
+            padding: 1rem;
+            background-color: #f7f9fc;
+            border-radius: 8px;
+        }
+        #selectedPartsSummary ul {
+            list-style: none; /* Geen standaard lijststijl */
+            padding-left: 0;
+            margin-bottom: 1rem;
+        }
+        #selectedPartsSummary ul li {
+            background-color: #f0f3f6; /* Lichte achtergrond voor lijstitems */
+            margin-bottom: 0.6rem;
+            padding: 0.8rem 1.2rem;
+            border-left: 5px solid #6091d3; /* Blauwe accentrand */
+            border-radius: 8px;
+            font-size: 0.95rem;
+            display: flex;
+            flex-direction: column; /* Items onder elkaar */
+            gap: 0.2rem; /* Ruimte tussen detailregels */
+        }
+        #selectedPartsSummary ul li strong {
+            font-size: 1.05rem;
+            color: #007bff;
+            margin-bottom: 0.2rem;
+        }
+        #selectedPartsSummary ul li .detail-item {
+            font-size: 0.9em;
+            color: #666;
+            margin-left: 1rem; /* Inspringen details */
+        }
+        #selectedPartsSummary ul li .seller-link {
+            font-size: 0.9em;
+            margin-top: 0.5rem;
+        }
+
+        .total-section {
+            margin-top: 2rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #28a745;
+            background-color: #e6ffe6;
+            border: 1px solid #28a745;
+            padding: 1rem;
+            border-radius: 10px;
+        }
+        #finalTotalOutput {
+            display: block;
+            text-align: center;
+        }
+        .order-button {
+            background-color: #28a745; /* Groene knop voor bestellen */
+            box-shadow: 0 6px 15px rgba(40,167,69,0.25);
+            margin-top: 2rem; /* Meer ruimte boven de knop */
+            display: block; /* Zorgt dat het een blok-element is */
+            margin-left: auto; /* Centreer de knop */
+            margin-right: auto;
+            width: fit-content; /* Pas de breedte aan de inhoud aan */
+        }
+        .order-button:hover {
+            background-color: #218838;
+            box-shadow: 0 8px 20px rgba(40,167,69,0.35);
+        }
+
+        .order-status-message {
+            background-color: #e0f7fa; /* Lichtblauwe achtergrond */
+            border-color: #00bcd4; /* Cyaan rand */
+            color: #00838f; /* Donkerder cyaan tekst */
+            margin-top: 1rem; /* Ruimte onder de knop */
+        }
+
+
+        /* Keyframe animaties */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive aanpassingen */
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 1.5rem;
+                border-radius: 10px;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+            h2 {
+                font-size: 1.4rem;
+            }
+            .section {
+                padding: 1.2rem;
+                border-radius: 10px;
+            }
+            select, input[type="text"], input[type="number"], button {
+                padding: 0.7rem;
+                font-size: 0.9rem;
+                border-radius: 8px;
+            }
+            button {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            display: flex; /* Use flexbox for centering */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto; /* For browsers not supporting flex for centering */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: fadeInScale 0.3s ease-out; /* Animation for appearance */
+        }
+
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #333;
+        }
+
+        .modal-content h3 {
+            color: #dc3545; /* Red for error */
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .modal-content p {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: #555;
+            margin-bottom: 25px;
+        }
+
+        .modal-ok-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+
+        .modal-ok-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Stel Jouw Droomfiets Samen!</h1>
+
+        <div class="section config-mode-selector">
+            <label for="bikeType">Kies fietstype:</label>
+            <select id="bikeType">
+                <option value="racefiets">Racefiets</option>
+                <option value="mtb">Mountainbike (MTB)</option>
+                <option value="gravel">Gravelbike</option>
+            </select>
+        </div>
+
+        <div class="section config-mode-selector">
+            <label for="configMode">Kies je modus:</label>
+            <select id="configMode">
+                <option value="manual">Zelf samenstellen</option>
+                <option value="auto">Advies op budget</option>
+            </select>
+        </div>
+
+        <!-- Handmatige configuratie sectie -->
+        <div id="manualConfigurator" class="config-section active">
+            <div class="section part-selection">
+                <h2>Frame</h2>
+                <select id="frameBrand"></select>
+                <select id="frameMaterial"></select>
+                <select id="frameModel"></select>
+                <div class="output" id="frameOutput"></div>
+            </div>
+
+            <div class="section part-selection">
+                <h2>Wielen</h2>
+                <select id="wheelBrand"></select>
+                <select id="wheelModel"></select>
+                <div class="output" id="wheelOutput"></div>
+            </div>
+
+            <div class="section part-selection">
+                <h2>Groupset</h2>
+                <select id="groupsetBrand"></select>
+                <select id="groupsetModel"></select>
+                <div class="output" id="groupsetOutput"></div>
+            </div>
+
+            <!-- NIEUW: Geïntegreerde Cockpit sectie -->
+            <div class="section part-selection">
+                <h2>Geïntegreerde Cockpit</h2>
+                <select id="integratedCockpitBrand"></select>
+                <select id="integratedCockpitModel"></select>
+                <div class="output" id="integratedCockpitOutput"></div>
+            </div>
+
+            <!-- Stuurpen sectie (nu boven Stuur) -->
+            <div class="section part-selection" id="stemSection">
+                <h2>Stuurpen</h2>
+                <select id="stemBrand"></select>
+                <select id="stemModel"></select>
+                <div class="output" id="stemOutput"></div>
+            </div>
+
+            <!-- Bestaande Stuur sectie -->
+            <div class="section part-selection" id="handlebarSection">
+                <h2>Stuur</h2>
+                <select id="handlebarBrand"></select>
+                <select id="handlebarModel"></select>
+                <div class="output" id="handlebarOutput"></div>
+            </div>
+
+            <div class="section part-selection">
+                <h2>Zadel</h2>
+                <select id="saddleBrand"></select>
+                <select id="saddleModel"></select>
+                <div class="output" id="saddleOutput"></div>
+            </div>
+        </div>
+
+        <!-- Advies op budget sectie -->
+        <div id="autoConfigurator" class="config-section">
+            <div class="section">
+                <h2>Advies op Budget</h2>
+                <label for="budgetInput">Voer je budget in (€):</label>
+                <input type="number" id="budgetInput" min="1000" value="3000">
+
+                <label for="frameMaterialPreference" style="margin-top: 15px;">Materiaal voorkeur frame:</label>
+                <select id="frameMaterialPreference">
+                    <option value="any">Geen voorkeur</option>
+                    <option value="carbon">Carbon</option>
+                    <option value="aluminium">Aluminium</option>
+                </select>
+
+                <label for="favoriteBrandPreference" style="margin-top: 15px;">Favoriet merk (voor frame, indien beschikbaar):</label>
+                <select id="favoriteBrandPreference">
+                    <option value="any">Geen voorkeur</option>
+                    <!-- Opties worden dynamisch gevuld door JS -->
+                </select>
+
+                <div style="display: flex; align-items: center; margin-top: 15px; gap: 10px;">
+                    <input type="checkbox" id="surpriseMe" style="width: auto; margin: 0;">
+                    <label for="surpriseMe" style="margin-bottom: 0;">Verras me! (negeert andere voorkeuren)</label>
+                </div>
+
+
+                <button id="generateBikeButton">Genereer Fiets op Budget</button>
+                <div class="output" id="budgetOutput"></div>
+                <div id="budgetLoadingIndicator" style="display: none; text-align: center; margin-top: 10px;">Fiets samenstellen...</div>
+            </div>
+        </div>
+        
+        <!-- Overzicht van gekozen onderdelen -->
+        <div class="section build-summary">
+            <h2>Jouw Samengestelde Fiets</h2>
+            <div id="selectedPartsSummary">
+                <p class="placeholder-text">Selecteer onderdelen of genereer een fiets om het overzicht te zien.</p>
+            </div>
+            <div class="output total-section">
+                <span id="finalTotalOutput">Totaalprijs: €0 | Gewicht: 0g</span>
+            </div>
+            <button id="orderBikeButton" class="order-button" style="display: none;">Bestel jouw Fiets!</button>
+            <div class="output order-status-message" id="orderStatusMessage" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Error Pop-up Modal -->
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 id="modalTitle">Compatibiliteitsprobleem!</h3>
+            <p id="modalMessage">Er is een probleem met de compatibiliteit van de geselecteerde onderdelen.</p>
+            <button class="modal-ok-button">OK</button>
+        </div>
+    </div>
+
+    <script>
+        /* JavaScript voor de functionaliteit van de configurator */
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Uitgebreide fietscomponentdata met details, meer modellen en verkoperlinks
+            const data = {
+                racefiets: {
+                    frame: {
+                        Cube: {
+                            carbon: [
+                                { model: "Agree C:62", price: 1899, weight: 950, brand: "Cube", details: { materialComposition: "C:62 Carbon Fiber", geometry: "Endurance Race", brakeType: "Flat Mount Disc", cableRouting: "Internal", bottomBracket: "Pressfit BB86" }, sellerLink: "https://www.cube.eu/nl-nl/cube-agree-c-62/279100" },
+                                { model: "Litening C:68X", price: 2999, weight: 850, brand: "Cube", details: { materialComposition: "C:68X High Modulus Carbon", geometry: "Aero Race", brakeType: "Flat Mount Disc", cableRouting: "Fully Integrated", bottomBracket: "Pressfit BB86" }, sellerLink: "https://www.cube.eu/nl-nl/cube-litening-c-68x/279200" },
+                                { model: "Attain GTC SLT", price: 2499, weight: 980, brand: "Cube", details: { materialComposition: "GTC Monocoque Carbon", geometry: "Endurance", brakeType: "Flat Mount Disc", cableRouting: "Internal", bottomBracket: "Pressfit BB86" }, sellerLink: "https://www.cube.eu/nl-nl/cube-attain-gtc-slt/279000" },
+                                { model: "Litening Aero C:68X SL", price: 4299, weight: 780, brand: "Cube", details: { materialComposition: "C:68X Aero Carbon", geometry: "Full Aero Race", brakeType: "Flat Mount Disc", cableRouting: "Fully Integrated", bottomBracket: "Pressfit BB86" }, sellerLink: "https://www.cube.eu/nl-nl/cube-litening-aero-c-68x-sl/279300" }
+                            ],
+                            aluminium: [
+                                { model: "Attain SL", price: 1199, weight: 1150, brand: "Cube", details: { materialComposition: "Aluminium 6061 T6", geometry: "Comfort Endurance", brakeType: "Flat Mount Disc", cableRouting: "External/Internal Mix", bottomBracket: "BSA Threaded" }, sellerLink: "https://www.cube.eu/nl-nl/cube-attain-sl/279500" },
+                                { model: "Attain Pro Disc", price: 999, weight: 1200, brand: "Cube", details: { materialComposition: "Aluminium 6061 T6", geometry: "Endurance", brakeType: "Flat Mount Disc", cableRouting: "External", bottomBracket: "BSA Threaded" }, sellerLink: "https://www.cube.eu/nl-nl/cube-attain-pro-disc/279600" },
+                                { model: "Streamer Race", price: 899, weight: 1300, brand: "Cube", details: { materialComposition: "Aluminium Lite", geometry: "Classic Race", brakeType: "Rim Brake", cableRouting: "External", bottomBracket: "BSA Threaded" }, sellerLink: "https://www.cube.eu/nl-nl/cube-streamer-race/279700" }
+                            ]
+                        },
+                        Trek: {
+                            carbon: [
+                                { model: "Emonda SL 6", price: 2899, weight: 880, brand: "Trek", details: { materialComposition: "500 Series OCLV Carbon", geometry: "H1.5 Race", brakeType: "Flat Mount Disc", cableRouting: "Internal", bottomBracket: "BB90" }, sellerLink: "https://www.trekbikes.com/nl/nl_NL/bikes/road-bikes/performance-road-bikes/emonda/emonda-sl-6/p/32560/" },
+                                { model: "Madone SL 6", price: 3799, weight: 840, brand: "Trek", details: { materialComposition: "500 Series OCLV Carbon", geometry: "H1.5 Aero Race", brakeType: "Flat Mount Disc", cableRouting: "Fully Integrated", bottomBracket: "BB90" }, sellerLink: "https://www.trekbikes.com/nl/nl_NL/bikes/road-bikes/performance-road-bikes/madone/madone-sl-6-disc/p/28471/" },
+                                { model: "Domane SL 5", price: 2599, weight: 950, brand: "Trek", details: { materialComposition: "500 Series OCLV Carbon", geometry: "Endurance", brakeType: "Flat Mount Disc", cableRouting: "Internal", bottomBracket: "BB90" }, sellerLink: "https://www.trekbikes.com/nl/nl_NL/bikes/road-bikes/endurance-road-bikes/domane/domane-sl-5/p/32571/" }
+                            ],
+                            aluminium: [
+                                { model: "Domane AL 2", price: 999, weight: 1300, brand: "Trek", details: { materialComposition: "100 Series Alpha Aluminium", geometry: "Endurance", brakeType: "Rim Brake", cableRouting: "External", bottomBracket: "BSA Threaded" }, sellerLink: "https://www.trekbikes.com/nl/nl_NL/bikes/road-bikes/endurance-road-bikes/domane/domane-al-2/p/32590/" },
+                                { model: "Domane AL 3 Disc", price: 1199, weight: 1250, brand: "Trek", details: { materialComposition: "100 Series Alpha Aluminium", geometry: "Endurance", brakeType: "Flat Mount Disc", cableRouting: "Internal", bottomBracket: "BSA Threaded" }, sellerLink: "https://www.trekbikes.com/nl/nl_NL/bikes/road-bikes/endurance-road-bikes/domane/domane-al-3-disc/p/32592/" }
+                            ]
+                        },
+                        Specialized: {
+                            carbon: [
+                                { model: "Tarmac SL7", price: 3799, weight: 820, brand: "Specialized", details: { materialComposition: "FACT 10r Carbon", geometry: "Rider-First Engineered™", brakeType: "Flat Mount Disc", cableRouting: "Fully Integrated", bottomBracket: "BSA Threaded" }, sellerLink: "https://www.specialized.com/nl/nl/tarmac-sl7-comp/p/199468" },
+                                { model: "Roubaix Comp", price: 3499, weight: 900, brand: "Specialized", details: { materialComposition: "FACT 10r Carbon", geometry: "Endurance", brakeType: "Flat Mount Disc", cableRouting: "Internal", bottomBracket: "BSA Threaded" }, sellerLink: "https://www.specialized.com/nl/nl/roubaix-comp/p/199452" }
+                            ]
+                        },
+                        Giant: {
+                            carbon: [
+                                { model: "TCR Advanced Pro 1", price: 2899, weight: 870, brand: "Giant", details: { materialComposition: "Advanced-Grade Carbon Composite", geometry: "Compact Road", brakeType: "Flat Mount Disc", cableRouting: "Internal", bottomBracket: "PowerCore BB" }, sellerLink: "https://www.giant-bicycles.com/nl/tcr-advanced-pro-1-disc" },
+                                { model: "Propel Advanced Pro 0", price: 4199, weight: 810, brand: "Giant", details: { materialComposition: "Advanced-Grade Carbon Composite", geometry: "Aero Road", brakeType: "Flat Mount Disc", cableRouting: "Fully Integrated", bottomBracket: "PowerCore BB" }, sellerLink: "https://www.giant-bicycles.com/nl/propel-advanced-pro-0-disc" }
+                            ]
+                        },
+                        BMC: {
+                            carbon: [
+                                { model: "Teammachine SLR", price: 3199, weight: 860, brand: "BMC", details: { materialComposition: "01 Premium Carbon", geometry: "ACE Technology", brakeType: "Flat Mount Disc", cableRouting: "Integrated Cockpit System", bottomBracket: "PF86" }, sellerLink: "https://www.bmc-switzerland.com/int_en/teammachine-slr.html" }
+                            ]
+                        },
+                        Scott: {
+                            carbon: [
+                                { model: "Addict RC 30", price: 2999, weight: 890, brand: "Scott", details: { materialComposition: "HMX Carbon", geometry: "Race Geometry", brakeType: "Flat Mount Disc", cableRouting: "Fully Integrated", bottomBracket: "Shimano Pressfit BB86" }, sellerLink: "https://www.scott-sports.com/nl/nl/product/scott-addict-rc-30-bike" },
+                                { model: "Foil RC 20", price: 3899, weight: 850, brand: "Scott", details: { materialComposition: "HMX Carbon", geometry: "Aero Race", brakeType: "Flat Mount Disc", cableRouting: "Fully Integrated", bottomBracket: "Shimano Pressfit BB86" }, sellerLink: "https://www.scott-sports.com/nl/nl/product/scott-foil-rc-20-bike" }
+                            ]
+                        }
+                    },
+                    wheels: {
+                        DT_Swiss: [
+                            { model: "P1800", price: 400, weight: 1600, brand: "DT_Swiss", details: { rimMaterial: "Aluminium", rimDepth: "23mm", innerRimWidth: "18mm", bearingType: "Steel Sealed Cartridge", axleType: "Thru Axle", tireType: "Clincher/Tubeless Ready", spokeCount: "20F/24R" }, sellerLink: "https://www.dtswiss.com/nl/wielen/wielen-race/prestige-road/p-1800-spline-db" },
+                            { model: "ARC 1400", price: 1600, weight: 1380, brand: "DT_Swiss", details: { rimMaterial: "Carbon", rimDepth: "50mm", innerRimWidth: "20mm", bearingType: "SINC Ceramic", axleType: "Thru Axle", tireType: "Tubeless Ready", spokeCount: "24F/24R" }, sellerLink: "https://www.dtswiss.com/nl/wielen/wielen-race/aero/arc-1400-dicut-db" },
+                            { model: "PRC 1100 DICUT", price: 2400, weight: 1250, brand: "DT_Swiss", details: { rimMaterial: "Carbon", rimDepth: "35mm", innerRimWidth: "18mm", bearingType: "SINC Ceramic", axleType: "Thru Axle", tireType: "Tubeless Ready", spokeCount: "24F/24R" }, sellerLink: "https://www.dtswiss.com/nl/wielen/wielen-race/endurance/prc-1100-dicut" }
+                        ],
+                        Mavic: [
+                            { model: "Cosmic SLR", price: 1499, weight: 1400, brand: "Mavic", details: { rimMaterial: "Carbon", rimDepth: "45mm", innerRimWidth: "19mm", bearingType: "QRM Auto Sealed Cartridge", axleType: "Thru Axle", tireType: "Tubeless UST", spokeCount: "20F/24R" }, sellerLink: "https://www.mavic.com/nl-nl/cosmic-slr-45-disc-road-wheels-v2540100.html" },
+                            { model: "Ksyrium Pro Carbon SL", price: 1800, weight: 1450, brand: "Mavic", details: { rimMaterial: "Carbon", rimDepth: "25mm", innerRimWidth: "19mm", bearingType: "QRM Auto Sealed Cartridge", axleType: "Thru Axle", tireType: "Tubeless UST", spokeCount: "20F/24R" }, sellerLink: "https://www.mavic.com/nl-nl/ksyrium-pro-carbon-sl-disc-tires-road-wheels-v2540200.html" }
+                        ],
+                        Fulcrum: [
+                            { model: "Racing Zero", price: 899, weight: 1510, brand: "Fulcrum", details: { rimMaterial: "Aluminium", rimDepth: "30mm", innerRimWidth: "17mm", bearingType: "USB Ceramic", axleType: "Quick Release", tireType: "Clincher/2-Way Fit", spokeCount: "16F/21R" }, sellerLink: "https://www.fulcrumwheels.com/en/wheels/road-bike-wheels/racing-zero" },
+                            { model: "Speed 40C", price: 1900, weight: 1420, brand: "Fulcrum", details: { rimMaterial: "Carbon", rimDepth: "40mm", innerRimWidth: "17mm", bearingType: "CULT Ceramic", axleType: "Quick Release", tireType: "Clincher", spokeCount: "18F/21R" }, sellerLink: "https://www.fulcrumwheels.com/en/wheels/road-bike-wheels/speed-40c" }
+                        ],
+                        Zipp: [
+                            { model: "303 Firecrest", price: 2200, weight: 1350, brand: "Zipp", details: { rimMaterial: "Carbon", rimDepth: "404mm", innerRimWidth: "25mm", bearingType: "ZR1 Hubs", axleType: "Thru Axle", tireType: "Tubeless Ready", spokeCount: "24F/24R" }, sellerLink: "https://www.sram.com/en/zipp/wheels/303-firecrest-disc-brake-wheelset" },
+                            { model: "404 Firecrest", price: 2500, weight: 1500, brand: "Zipp", details: { rimMaterial: "Carbon", rimDepth: "58mm", innerRimWidth: "23mm", bearingType: "ZR1 Hubs", axleType: "Thru Axle", tireType: "Tubeless Ready", spokeCount: "24F/24R" }, sellerLink: "https://www.sram.com/en/zipp/wheels/404-firecrest-disc-brake-wheelset" }
+                        ],
+                        Campagnolo: [
+                            { model: "Bora WTO 45", price: 2100, weight: 1420, brand: "Campagnolo", details: { rimMaterial: "Carbon", rimDepth: "45mm", innerRimWidth: "19mm", bearingType: "USB Ceramic", axleType: "Quick Release/Thru Axle", tireType: "2-Way Fit", spokeCount: "18F/21R" }, sellerLink: "https://www.campagnolo.com/WW/en/wheels/bora_wto_45" }
+                        ],
+                        Hunt: [
+                            { model: "Aero 50", price: 999, weight: 1460, brand: "Hunt", details: { rimMaterial: "Carbon", rimDepth: "50mm", innerRimWidth: "19mm", bearingType: "EZO Sealed Cartridge", axleType: "Thru Axle", tireType: "Tubeless Ready", spokeCount: "20F/24R" }, sellerLink: "https://www.huntbikewheels.com/products/hunt-50-carbon-aero-disc-wheelset" }
+                        ],
+                        Roval: [
+                            { model: "Rapide CLX", price: 2500, weight: 1350, brand: "Roval", details: { rimMaterial: "Carbon", rimDepth: "51mm/60mm (F/R)", innerRimWidth: "21mm", bearingType: "CeramicSpeed", axleType: "Thru Axle", tireType: "Tubeless Ready", spokeCount: "18F/24R" }, sellerLink: "https://www.specialized.com/nl/nl/roval-rapide-clx/p/200000" }
+                        ]
+                    },
+                    groupset: {
+                        Shimano: [
+                            { model: "105 Di2", price: 1300, weight: 2500, brand: "Shimano", details: { speed: "2x12", brakeType: "Hydraulic Disc", shiftType: "Electronic Di2", chainrings: "50/34T, 52/36T", cassetteOptions: "11-34T, 11-36T", series: "R7100" }, sellerLink: "https://bike.shimano.com/nl-NL/product/component/shimano105-r7100-di2/ST-R7170.html" },
+                            { model: "Ultegra Di2", price: 2200, weight: 2300, brand: "Shimano", details: { speed: "2x12", brakeType: "Hydraulic Disc", shiftType: "Electronic Di2", chainrings: "50/34T, 52/36T, 54/40T", cassetteOptions: "11-30T, 11-34T", series: "R8100" }, sellerLink: "https://bike.shimano.com/nl-NL/product/component/ultegra-r8100-di2/ST-R8170.html" },
+                            { model: "Dura-Ace Di2", price: 3600, weight: 2100, brand: "Shimano", details: { speed: "2x12", brakeType: "Hydraulic Disc", shiftType: "Electronic Di2", chainrings: "50/34T, 52/36T, 54/40T", cassetteOptions: "11-30T, 11-34T", series: "R9200" }, sellerLink: "https://bike.shimano.com/nl-NL/product/component/dura-ace-r9200-di2/ST-R9270.html" },
+                            { model: "105 R7000", price: 600, weight: 2700, brand: "Shimano", details: { speed: "2x11", brakeType: "Rim Brake", shiftType: "Mechanical", chainrings: "50/34T", cassetteOptions: "11-30T, 11-32T", series: "R7000" }, sellerLink: "https://bike.shimano.com/nl-NL/product/component/shimano105-r7000/ST-R7000.html" },
+                            { model: "Tiagra 4700", price: 400, weight: 2900, brand: "Shimano", details: { speed: "2x10", brakeType: "Rim Brake", shiftType: "Mechanical", chainrings: "50/34T, 52/36T", cassetteOptions: "11-32T, 11-34T", series: "4700" }, sellerLink: "https://bike.shimano.com/nl-NL/product/component/tiagra-4700/ST-4700.html" }
+                        ],
+                        SRAM: [
+                            { model: "Rival AXS", price: 1500, weight: 2400, brand: "SRAM", details: { speed: "2x12", brakeType: "Hydraulic Disc", shiftType: "Electronic Wireless (AXS)", chainrings: "48/35T, 46/33T", cassetteOptions: "10-30T, 10-36T", series: "Rival" }, sellerLink: "https://www.sram.com/en/sram/road/series/sram-rival-axs" },
+                            { model: "Force AXS", price: 2200, weight: 2200, brand: "SRAM", details: { speed: "2x12", brakeType: "Hydraulic Disc", shiftType: "Electronic Wireless (AXS)", chainrings: "48/35T, 46/33T", cassetteOptions: "10-28T, 10-33T", series: "Force" }, sellerLink: "https://www.sram.com/en/sram/road/series/sram-force-axs" },
+                            { model: "Red AXS", price: 3700, weight: 2000, brand: "SRAM", details: { speed: "2x12", brakeType: "Hydraulic Disc", shiftType: "Electronic Wireless (AXS)", chainrings: "50/37T, 48/35T", cassetteOptions: "10-28T, 10-33T", series: "Red" }, sellerLink: "https://www.sram.com/en/sram/road/series/sram-red-axs" },
+                            { model: "Apex", price: 599, weight: 2750, brand: "SRAM", details: { speed: "2x10", brakeType: "Rim Brake", shiftType: "Mechanical", chainrings: "50/34T", cassetteOptions: "11-32T", series: "Apex" }, sellerLink: "https://www.sram.com/en/sram/road/series/sram-apex" }
+                        ],
+                        Campagnolo: [
+                            { model: "Chorus 12", price: 1600, weight: 2300, brand: "Campagnolo", details: { speed: "2x12", brakeType: "Rim Brake", shiftType: "Mechanical", chainrings: "50/34T, 52/36T", cassetteOptions: "11-29T, 11-32T", series: "Chorus" }, sellerLink: "https://www.campagnolo.com/WW/en/components/chorus_12_speed" },
+                            { model: "Super Record EPS", price: 3500, weight: 2100, brand: "Campagnolo", details: { speed: "2x12", brakeType: "Hydraulic Disc", shiftType: "Electronic (EPS)", chainrings: "50/34T, 52/36T", cassetteOptions: "11-29T, 11-32T", series: "Super Record" }, sellerLink: "https://www.campagnolo.com/WW/en/components/super_record_eps" }
+                        ]
+                    },
+                    handlebar: {
+                        Zipp: [
+                            { model: "Service Course SL-70", price: 120, weight: 250, brand: "Zipp", details: { material: "7050 Aluminium", drop: "128mm", reach: "70mm", clampDiameter: "31.8mm", shape: "Ergonomic" }, sellerLink: "https://www.sram.com/en/zipp/components/handlebars/service-course-sl-70" }
+                        ],
+                        Ritchey: [
+                            { model: "WCS Logic", price: 90, weight: 240, brand: "Ritchey", details: { material: "Triple Butted 7050 Alloy", drop: "125mm", reach: "70mm", clampDiameter: "31.8mm", shape: "Compact" }, sellerLink: "https://ritcheylogic.com/bike/handlebars/wcs-logic-road-bar" }
+                        ],
+                        FSA: [
+                            { model: "K-Force Compact", price: 200, weight: 220, brand: "FSA", details: { material: "Carbon Fiber", drop: "125mm", reach: "80mm", clampDiameter: "31.8mm", shape: "Compact" }, sellerLink: "https://www.fullspeedahead.com/products/handlebars-road/k-force-compact-handlebar" }
+                        ],
+                        Easton: [
+                            { model: "EC90 Aero", price: 280, weight: 210, brand: "Easton", details: { material: "EC90 Carbon", drop: "125mm", reach: "80mm", clampDiameter: "31.8mm", shape: "Aero Top" }, sellerLink: "https://eastoncycling.com/products/ec90-aero-carbon-road-bar" }
+                        ],
+                        Pro: [
+                            { model: "Vibe Aero Superlight", price: 299, weight: 215, brand: "Pro", details: { material: "Carbon", drop: "130mm", reach: "80mm", clampDiameter: "31.8mm", shape: "Aero" }, sellerLink: "https://www.pro-bikegear.com/nl-nl/product/vibe-aero-carbon-compact-handlebar" }
+                        ],
+                        Deda: [
+                            { model: "Zero 100", price: 110, weight: 230, brand: "Deda", details: { material: "7075 T6 Triple Butted Alloy", drop: "128mm", reach: "75mm", clampDiameter: "31.7mm", shape: "RHM" }, sellerLink: "https://www.dedaelementi.com/en/zero100-handlebar" }
+                        ]
+                    },
+                    stem: { // Stuurpen
+                        Zipp: [
+                            { model: "Service Course SL", price: 100, weight: 125, brand: "Zipp", details: { material: "7075 Aluminium", length: "100mm", angle: "6 degrees", clampDiameter: "31.8mm" }, sellerLink: "https://www.sram.com/en/zipp/components/stems/service-course-sl-stem" },
+                            { model: "Service Course SL Sprint", price: 250, weight: 170, brand: "Zipp", details: { material: "Carbon", length: "120mm", angle: "12 degrees", clampDiameter: "31.8mm" }, sellerLink: "https://www.sram.com/en/zipp/components/stems/service-course-sl-sprint" }
+                        ],
+                        Ritchey: [
+                            { model: "WCS C220", price: 80, weight: 135, brand: "Ritchey", details: { material: "2014 Alloy", length: "90mm", angle: "6 degrees", clampDiameter: "31.8mm" }, sellerLink: "https://ritcheylogic.com/bike/stems/wcs-c220-stem" }
+                        ],
+                        FSA: [
+                            { model: "OS-99 CSI", price: 110, weight: 130, brand: "FSA", details: { material: "Aluminium/Carbon Wrap", length: "100mm", angle: "6 degrees", clampDiameter: "31.8mm" }, sellerLink: "https://www.fullspeedahead.com/products/stems-road/os-99-csi-stem" }
+                        ],
+                        Pro: [
+                            { model: "Vibe", price: 100, weight: 120, brand: "Pro", details: { material: "Aluminium 7075", length: "100mm", angle: "10 degrees", clampDiameter: "31.8mm" }, sellerLink: "https://www.pro-bikegear.com/nl-nl/product/vibe-stem" }
+                        ]
+                    },
+                    integrated_cockpit: { // Nieuw onderdeel: Geïntegreerde Cockpit
+                        Ritchey: [
+                            { model: "WCS Solostream", price: 350, weight: 380, brand: "Ritchey", details: { material: "Carbon", width: "420mm", stemLength: "100mm", angle: "8 degrees", drop: "128mm", reach: "70mm" }, sellerLink: "https://ritcheylogic.com/bike/handlebars/wcs-solostream-integrated-bar" }
+                        ],
+                        Vision: [
+                            { model: "Metron 5D ACR", price: 600, weight: 395, brand: "Vision", details: { material: "Carbon", width: "400mm", stemLength: "110mm", angle: "6 degrees", drop: "125mm", reach: "80mm", cableRouting: "Internal" }, sellerLink: "https://www.visiontechusa.com/en/handlebars/road/metron-5d-acr-integrated-handlebar" }
+                        ],
+                        PRO: [
+                            { model: "Vibe Evo", price: 700, weight: 400, brand: "PRO", details: { material: "Carbon", width: "420mm", stemLength: "120mm", angle: "8 degrees", drop: "130mm", reach: "75mm", cableRouting: "Internal" }, sellerLink: "https://www.pro-bikegear.com/nl-nl/product/vibe-evo-integrated-handlebar" }
+                        ],
+                        Syncros: [
+                            { model: "Creston iC SL X", price: 550, weight: 300, brand: "Syncros", details: { material: "Carbon", width: "400mm", stemLength: "100mm", angle: "8 degrees", drop: "125mm", reach: "75mm", cableRouting: "Internal" }, sellerLink: "https://www.syncros.com/nl/nl/product/syncros-creston-ic-sl-x-integrated-cockpit" }
+                        ]
+                    },
+                    saddle: {
+                        Fizik: [
+                            { model: "Arione R3", price: 150, weight: 170, brand: "Fizik", details: { shellMaterial: "Composite Carbon", railMaterial: "K:ium", padding: "Comfort Foam", widthOptions: "Regular", length: "300mm", support: "Snake (Flexible riders)" }, sellerLink: "https://www.fizik.com/nl_en/arione-r3-open-kium.html" },
+                            { model: "Antares R1", price: 220, weight: 160, brand: "Fizik", details: { shellMaterial: "Carbon Reinforced Nylon", railMaterial: "Carbon Braided", padding: "Light Foam", widthOptions: "Regular", length: "274mm", support: "Chameleon (Medium flexibility)" }, sellerLink: "https://www.fizik.com/nl_en/antares-r1-open-carbon.html" }
+                        ],
+                        Selle_Italia: [
+                            { model: "SLR Boost", price: 180, weight: 160, brand: "Selle_Italia", details: { shellMaterial: "Carbon-Nylon Composite", railMaterial: "Manganese", padding: "Compact", widthOptions: "S3, L3", length: "248mm", support: "Short Nose, Light Weight" }, sellerLink: "https://www.selleitalia.com/en/saddles/slr-boost/" }
+                        ],
+                        Prologo: [
+                            { model: "Dimension NDR", price: 130, weight: 180, brand: "Prologo", details: { shellMaterial: "Carbon Fiber", railMaterial: "Tirox", padding: "Multi-Density", widthOptions: "Standard", length: "245mm", support: "Short Nose, Perineal Relief" }, sellerLink: "https://www.prologotouch.com/en/road-saddles/dimension-ndr" }
+                        ],
+                        Specialized: [
+                            { model: "Power Expert", price: 140, weight: 160, brand: "Specialized", details: { shellMaterial: "Carbon Reinforced", railMaterial: "Titanium", padding: "Level 2", widthOptions: "143mm, 155mm", length: "240mm", support: "Short Nose, Body Geometry" }, sellerLink: "https://www.specialized.com/nl/nl/power-expert/p/172605" }
+                        ],
+                        Ergon: [
+                            { model: "SR Pro Men", price: 130, weight: 190, brand: "Ergon", details: { shellMaterial: "Nylon Composite", railMaterial: "TiNox", padding: "Orthopedic AirCell Foam", widthOptions: "S/M, M/L", length: "270mm", support: "Ergonomic, Pressure Relief" }, sellerLink: "https://www.ergonbike.com/en/product-details.html?a=saddles&anr=44050010&s=sr-pro-men" }
+                        ],
+                        Bontrager: [
+                            { model: "Verse Elite", price: 120, weight: 175, brand: "Bontrager", details: { shellMaterial: "Carbon Reinforced", railMaterial: "Austenite", padding: "Comfort", widthOptions: "135mm, 145mm, 155mm", length: "270mm", support: "Short Nose, Full Cutout" }, sellerLink: "https://www.trekbikes.com/nl/nl_NL/equipment/cycling-components/bike-saddles/bontrager-verse-elite-saddle/p/31038/" }
+                        ]
+                    }
+                },
+                mtb: {
+                    frame: {
+                        Specialized: {
+                            carbon: [
+                                { model: "Epic HT Comp", price: 2100, weight: 1050, brand: "Specialized", details: { materialComposition: "FACT 11m Carbon", suspensionTravel: "100mm (front)", wheelSize: "29 inch", brakeType: "Disc", cableRouting: "Internal" }, sellerLink: "https://www.specialized.com/nl/nl/epic-hardtail-comp/p/200000" },
+                                { model: "Stumpjumper Comp Carbon", price: 2800, weight: 1200, brand: "Specialized", details: { materialComposition: "FACT 11m Carbon", suspensionTravel: "130mm (front/rear)", wheelSize: "29 inch", brakeType: "Disc", cableRouting: "Internal" }, sellerLink: "https://www.specialized.com/nl/nl/stumpjumper-comp-carbon/p/200000" }
+                            ],
+                            aluminium: [
+                                { model: "Fuse Comp", price: 1200, weight: 1300, brand: "Specialized", details: { materialComposition: "M4 Aluminium", suspensionTravel: "130mm (front)", wheelSize: "29 inch", brakeType: "Disc", cableRouting: "Internal/External" }, sellerLink: "https://www.specialized.com/nl/nl/fuse-comp/p/200000" },
+                                { model: "Rockhopper Elite", price: 900, weight: 1450, brand: "Specialized", details: { materialComposition: "A1 Premium Aluminium", suspensionTravel: "100mm (front)", wheelSize: "29 inch", brakeType: "Disc", cableRouting: "External" }, sellerLink: "https://www.specialized.com/nl/nl/rockhopper-elite/p/200000" }
+                            ]
+                        },
+                        Trek: {
+                            carbon: [
+                                { model: "Supercaliber 9.7", price: 3500, weight: 1100, brand: "Trek", details: { materialComposition: "OCLV Mountain Carbon", suspensionTravel: "60mm (IsoStrut)", wheelSize: "29 inch", brakeType: "Disc", cableRouting: "Internal" }, sellerLink: "https://www.trekbikes.com/nl/nl_NL/bikes/mountain-bikes/cross-country-mountain-bikes/supercaliber/supercaliber-9-7/p/32958/" },
+                                { model: "Fuel EX 8", price: 3200, weight: 1300, brand: "Trek", details: { materialComposition: "OCLV Mountain Carbon", suspensionTravel: "140mm (front), 130mm (rear)", wheelSize: "29 inch", brakeType: "Disc", cableRouting: "Internal" }, sellerLink: "https://www.trekbikes.com/nl/nl_NL/bikes/mountain-bikes/trail-mountain-bikes/fuel-ex/fuel-ex-8/p/33054/" }
+                            ],
+                            aluminium: [
+                                { model: "Roscoe 7", price: 1350, weight: 1450, brand: "Trek", details: { materialComposition: "Alpha Gold Aluminum", suspensionTravel: "140mm (front)", wheelSize: "27.5/29 inch", brakeType: "Disc", cableRouting: "Internal" }, sellerLink: "https://www.trekbikes.com/nl/nl_NL/bikes/mountain-bikes/trail-mountain-bikes/roscoe/roscoe-7/p/35168/" },
+                                { model: "Marlin 7", price: 850, weight: 1500, brand: "Trek", details: { materialComposition: "Alpha Silver Aluminum", suspensionTravel: "100mm (front)", wheelSize: "29 inch", brakeType: "Disc", cableRouting: "Internal" }, sellerLink: "https://www.trekbikes.com/nl/nl_NL/bikes/mountain-bikes/cross-country-mountain-bikes/marlin/marlin-7/p/34586/" }
+                            ]
+                        },
+                        Canyon: {
+                            carbon: [
+                                { model: "Lux Trail CF 7", price: 3000, weight: 1150, brand: "Canyon", details: { materialComposition: "Carbon Fiber", suspensionTravel: "120mm (front), 110mm (rear)", wheelSize: "29 inch", brakeType: "Disc", cableRouting: "Internal" }, sellerLink: "https://www.canyon.com/nl-nl/mountain-bikes/trail-bikes/lux-trail/lux-trail-cf/lux-trail-cf-7/2932.html" },
+                                { model: "Spectral CF 8", price: 3800, weight: 1250, brand: "Canyon", details: { materialComposition: "Carbon Fiber", suspensionTravel: "160mm (front), 150mm (rear)", wheelSize: "27.5/29 inch", brakeType: "Disc", cableRouting: "Internal" }, sellerLink: "https://www.canyon.com/nl-nl/mountain-bikes/trail-bikes/spectral/spectral-cf/spectral-cf-8/2950.html" }
+                            ]
+                        }
+                    },
+                    wheels: {
+                        DT_Swiss: [
+                            { model: "M 1900 SPLINE", price: 450, weight: 1900, brand: "DT_Swiss", details: { rimMaterial: "Aluminium", innerRimWidth: "30mm", bearingType: "Sealed Cartridge", axleType: "Boost", tireType: "Tubeless Ready", spokeCount: "28F/28R" }, sellerLink: "https://www.dtswiss.com/nl/wielen/wielen-mtb/allmountain/m-1900-spline" },
+                            { model: "XRC 1200 SPLINE", price: 1800, weight: 1400, brand: "DT_Swiss", details: { rimMaterial: "Carbon", innerRimWidth: "25mm", bearingType: "SINC Ceramic", axleType: "Boost", tireType: "Tubeless Ready", spokeCount: "28F/28R" }, sellerLink: "https://www.dtswiss.com/nl/wielen/wielen-mtb/cross-country/xrc-1200-spline" }
+                        ],
+                        Mavic: [
+                            { model: "Crossmax", price: 600, weight: 1850, brand: "Mavic", details: { rimMaterial: "Maxtal Aluminium", innerRimWidth: "25mm", bearingType: "QRM Auto", axleType: "Boost", tireType: "Tubeless UST", spokeCount: "24F/24R" }, sellerLink: "https://www.mavic.com/nl-nl/crossmax-mtb-wheels-v2540100.html" }
+                        ],
+                        Shimano: [
+                            { model: "Deore XT WH-M8100", price: 550, weight: 1800, brand: "Shimano", details: { rimMaterial: "Aluminium", innerRimWidth: "24mm", bearingType: "Cone & Cup", axleType: "Boost", tireType: "Tubeless Ready", spokeCount: "28F/28R" }, sellerLink: "https://bike.shimano.com/nl-NL/product/component/deore-xt-m8100/WH-M8100-TL-R12-B.html" }
+                        ]
+                    },
+                    groupset: {
+                        Shimano: [
+                            { model: "Deore M6100", price: 400, weight: 3200, brand: "Shimano", details: { speed: "1x12", brakeType: "Hydraulic Disc", shiftType: "Mechanical", chainrings: "32T", cassetteOptions: "10-51T", series: "Deore" }, sellerLink: "https://bike.shimano.com/nl-NL/product/component/deore-m6100/RD-M6100-SGS.html" },
+                            { model: "SLX M7100", price: 550, weight: 2900, brand: "Shimano", details: { speed: "1x12", brakeType: "Hydraulic Disc", shiftType: "Mechanical", chainrings: "32T", cassetteOptions: "10-51T", series: "SLX" }, sellerLink: "https://bike.shimano.com/nl-NL/product/component/slx-m7100/RD-M7100-SGS.html" },
+                            { model: "Deore XT M8100", price: 800, weight: 2700, brand: "Shimano", details: { speed: "1x12", brakeType: "Hydraulic Disc", shiftType: "Mechanical", chainrings: "32T, 34T", cassetteOptions: "10-51T", series: "XT" }, sellerLink: "https://bike.shimano.com/nl-NL/product/component/deore-xt-m8100/RD-M8100-SGS.html" }
+                        ],
+                        SRAM: [
+                            { model: "NX Eagle", price: 450, weight: 3500, brand: "SRAM", details: { speed: "1x12", brakeType: "Hydraulic Disc", shiftType: "Mechanical", chainrings: "32T", cassetteOptions: "11-50T", series: "Eagle" }, sellerLink: "https://www.sram.com/en/sram/mountain/series/sram-nx-eagle" },
+                            { model: "GX Eagle AXS", price: 800, weight: 2900, brand: "SRAM", details: { speed: "1x12", brakeType: "Hydraulic Disc", shiftType: "Electronic Wireless (AXS)", chainrings: "32T", cassetteOptions: "10-52T", series: "Eagle" }, sellerLink: "https://www.sram.com/en/sram/mountain/series/sram-gx-eagle-axs" },
+                            { model: "XX1 Eagle AXS", price: 1600, weight: 2500, brand: "SRAM", details: { speed: "1x12", brakeType: "Hydraulic Disc", shiftType: "Electronic Wireless (AXS)", chainrings: "32T, 34T", cassetteOptions: "10-52T", series: "Eagle" }, sellerLink: "https://www.sram.com/en/sram/mountain/series/sram-xx1-eagle-axs" }
+                        ]
+                    },
+                    handlebar: {
+                        RaceFace: [
+                            { model: "Aeffect R", price: 70, weight: 330, brand: "RaceFace", details: { material: "6061 Aluminium", rise: "20mm", width: "780mm", clampDiameter: "35mm" }, sellerLink: "https://www.raceface.com/products/aeffect-r-handlebar" }
+                        ],
+                        Renthal: [
+                            { model: "Fatbar Carbon", price: 150, weight: 225, brand: "Renthal", details: { material: "Carbon Fiber", rise: "30mm", width: "800mm", clampDiameter: "31.8mm" }, sellerLink: "https://www.renthalcycling.com/mtb/handlebars/fatbar-carbon/" }
+                        ],
+                        Truvativ: [
+                            { model: "Descendant Carbon", price: 180, weight: 200, brand: "Truvativ", details: { material: "Carbon Fiber", rise: "25mm", width: "760mm", clampDiameter: "35mm" }, sellerLink: "https://www.sram.com/en/truvativ/components/handlebars/descendant-carbon-handlebar" }
+                        ]
+                    },
+                    stem: { // Stuurpen
+                        Zipp: [
+                            { model: "Service Course SL", price: 100, weight: 125, brand: "Zipp", details: { material: "7075 Aluminium", length: "100mm", angle: "6 degrees", clampDiameter: "31.8mm" }, sellerLink: "https://www.sram.com/en/zipp/components/stems/service-course-sl-stem" }
+                        ],
+                        Ritchey: [
+                            { model: "WCS Trail", price: 80, weight: 135, brand: "Ritchey", details: { material: "3D Forged 2014 Alloy", length: "50mm", angle: "0 degrees", clampDiameter: "31.8mm" }, sellerLink: "https://ritcheylogic.com/bike/stems/wcs-trail-stem" }
+                        ],
+                        FSA: [
+                            { model: "SL-K", price: 110, weight: 130, brand: "FSA", details: { material: "Aluminium/Carbon Wrap", length: "70mm", angle: "6 degrees", clampDiameter: "31.8mm" }, sellerLink: "https://www.fullspeedahead.com/products/stems-mtb/sl-k-stem" }
+                        ]
+                    },
+                    integrated_cockpit: {
+                         // Geïntegreerde cockpits zijn minder gangbaar voor MTB, hier een voorbeeld voor XC
+                        Syncros: [
+                            { model: "Fraser iC SL XC", price: 550, weight: 320, brand: "Syncros", details: { material: "Carbon", width: "740mm", stemLength: "70mm", angle: "8 degrees", drop: "0mm", purpose: "MTB XC" }, sellerLink: "https://www.syncros.com/nl/nl/product/syncros-fraser-ic-sl-special-edition-xc-carbon-handlebar" }
+                        ]
+                    },
+                    saddle: {
+                        Specialized: [
+                            { model: "Power Comp", price: 120, weight: 240, brand: "Specialized", details: { shellMaterial: "Carbon Reinforced", railMaterial: "Cr-Mo", padding: "Level 2", widthOptions: "143mm, 155mm", length: "240mm", support: "Short Nose, Body Geometry" }, sellerLink: "https://www.specialized.com/nl/nl/power-comp/p/172605" },
+                            { model: "Mimic Comp", price: 130, weight: 250, brand: "Specialized", details: { shellMaterial: "Carbon Reinforced", railMaterial: "Cr-Mo", padding: "Mimic Technology", widthOptions: "143mm, 155mm", length: "240mm", support: "Women's Specific, Pressure Relief" }, sellerLink: "https://www.specialized.com/nl/nl/power-comp-with-mimic/p/172605" }
+                        ],
+                        Fizik: [
+                            { model: "Terra Aidon X5", price: 100, weight: 250, brand: "Fizik", details: { shellMaterial: "Carbon Reinforced Nylon", railMaterial: "S-Alloy", padding: "Type 2 Foam", widthOptions: "Regular", length: "255mm", support: "Waved, All-mountain" }, sellerLink: "https://www.fizik.com/nl_en/terra-aidon-x5.html" },
+                            { model: "Gravita X5", price: 90, weight: 260, brand: "Fizik", details: { shellMaterial: "Nylon Carbon Reinforced", railMaterial: "S-Alloy", padding: "Comfort", widthOptions: "Regular", length: "255mm", support: "Gravity, Downhill" }, sellerLink: "https://www.fizik.com/nl_en/gravita-x5.html" }
+                        ],
+                        WTB: [
+                            { model: "Volt Race", price: 80, weight: 220, brand: "WTB", details: { shellMaterial: "Flex-Tuned Base", railMaterial: "Cr-Mo", padding: "DNA Padding", widthOptions: "Narrow, Medium, Wide", length: "265mm", support: "Aggressive Riding, Comfort" }, sellerLink: "https://www.wtb.com/products/volt" }
+                        ]
+                    }
+                },
+                gravel: {
+                    frame: {
+                        Canyon: {
+                            carbon: [
+                                { model: "Grizl CF SL 7", price: 2300, weight: 1080, brand: "Canyon", details: { materialComposition: "Carbon Fiber", tireClearance: "45mm", mountPoints: "Triple mounts on fork, top tube mount", axleType: "Thru Axle", brakeType: "Flat Mount Disc" }, sellerLink: "https://www.canyon.com/nl-nl/gravel-bikes/all-road/grizl/cf-sl/grizl-cf-sl-7/2712.html" },
+                                { model: "Grail CF SL 8", price: 2800, weight: 1000, brand: "Canyon", details: { materialComposition: "Carbon Fiber", tireClearance: "42mm", mountPoints: "Integrated Cockpit", axleType: "Thru Axle", brakeType: "Flat Mount Disc" }, sellerLink: "https://www.canyon.com/nl-nl/gravel-bikes/all-road/grail/cf-sl/grail-cf-sl-8/2707.html" }
+                            ],
+                            aluminium: [
+                                { model: "Grail AL 7", price: 1400, weight: 1350, brand: "Canyon", details: { materialComposition: "Aluminium", tireClearance: "42mm", mountPoints: "Fender mounts", axleType: "Thru Axle", brakeType: "Flat Mount Disc" }, sellerLink: "https://www.canyon.com/nl-nl/gravel-bikes/all-road/grail/al/grail-al-7/2708.html" },
+                                { model: "Grizl AL 6", price: 1500, weight: 1400, brand: "Canyon", details: { materialComposition: "Aluminium", tireClearance: "45mm", mountPoints: "Triple mounts on fork", axleType: "Thru Axle", brakeType: "Flat Mount Disc" }, sellerLink: "https://www.canyon.com/nl-nl/gravel-bikes/all-road/grizl/al/grizl-al-6/2711.html" }
+                            ]
+                        },
+                        Specialized: {
+                            carbon: [
+                                { model: "Diverge Comp Carbon", price: 2800, weight: 1100, brand: "Specialized", details: { materialComposition: "FACT 9r Carbon", futureShock: "Future Shock 2.0", tireClearance: "47mm (700c), 2.1 inch (650b)", mountPoints: "SWAT™ Door", axleType: "Thru Axle", brakeType: "Flat Mount Disc" }, sellerLink: "https://www.specialized.com/nl/nl/diverge-comp-carbon/p/200000" },
+                                { model: "Diverge Expert Carbon", price: 3800, weight: 1000, brand: "Specialized", details: { materialComposition: "FACT 9r Carbon", futureShock: "Future Shock 2.0", tireClearance: "47mm (700c), 2.1 inch (650b)", mountPoints: "SWAT™ Door", axleType: "Thru Axle", brakeType: "Flat Mount Disc" }, sellerLink: "https://www.specialized.com/nl/nl/diverge-expert-carbon/p/200000" }
+                            ],
+                            aluminium: [
+                                { model: "Diverge Elite E5", price: 1300, weight: 1400, brand: "Specialized", details: { materialComposition: "E5 Premium Aluminium", tireClearance: "47mm (700c), 2.1 inch (650b)", mountPoints: "Fender & Rack mounts", axleType: "Thru Axle", brakeType: "Flat Mount Disc" }, sellerLink: "https://www.specialized.com/nl/nl/diverge-elite-e5/p/200000" }
+                            ]
+                        },
+                        Trek: {
+                            carbon: [
+                                { model: "Checkpoint SL 5", price: 2400, weight: 1200, brand: "Trek", details: { materialComposition: "500 Series OCLV Carbon", isospeed: "Rear IsoSpeed", tireClearance: "45mm", mountPoints: "Rack & Fender mounts", axleType: "Adjustable Stranglehold Dropouts", brakeType: "Flat Mount Disc" }, sellerLink: "https://www.trekbikes.com/nl/nl_NL/bikes/road-bikes/gravel-bikes/checkpoint/checkpoint-sl-5/p/32554/" }
+                            ]
+                        },
+                        Cannondale: {
+                            aluminium: [
+                                { model: "Topstone 1", price: 1600, weight: 1380, brand: "Cannondale", details: { materialComposition: "SmartForm C2 Alloy", kingpin: "Kingpin suspension", tireClearance: "45mm", mountPoints: "Multiple bottle & gear mounts", axleType: "Thru Axle", brakeType: "Flat Mount Disc" }, sellerLink: "https://www.cannondale.com/nl-nl/bikes/road/gravel-bikes/topstone-alloy/topstone-1" },
+                                { model: "Topstone 2", price: 1400, weight: 1450, brand: "Cannondale", details: { materialComposition: "SmartForm C2 Alloy", kingpin: "Kingpin suspension", tireClearance: "45mm", mountPoints: "Multiple bottle & gear mounts", axleType: "Thru Axle", brakeType: "Flat Mount Disc" }, sellerLink: "https://www.cannondale.com/nl-nl/bikes/road/gravel-bikes/topstone-alloy/topstone-2" }
+                            ]
+                        }
+                    },
+                    wheels: {
+                        DT_Swiss: [
+                            { model: "GR 1600 SPLINE", price: 700, weight: 1770, brand: "DT_Swiss", details: { rimMaterial: "Aluminium", innerRimWidth: "24mm", bearingType: "Sealed Cartridge", axleType: "Thru Axle", tireType: "Tubeless Ready", spokeCount: "24F/24R" }, sellerLink: "https://www.dtswiss.com/nl/wielen/wielen-gravel/gravel/gr-1600-spline-db" },
+                            { model: "GRC 1400 SPLINE", price: 2000, weight: 1540, brand: "DT_Swiss", details: { rimMaterial: "Carbon", innerRimWidth: "24mm", bearingType: "SINC Ceramic", axleType: "Thru Axle", tireType: "Tubeless Ready", spokeCount: "24F/24R" }, sellerLink: "https://www.dtswiss.com/nl/wielen/wielen-gravel/gravel/grc-1400-spline-db" }
+                        ],
+                        Hunt: [
+                            { model: "4 Season Gravel", price: 450, weight: 1650, brand: "Hunt", details: { rimMaterial: "Aluminium", innerRimWidth: "25mm", bearingType: "EZO Sealed Cartridge", axleType: "Thru Axle", tireType: "Tubeless Ready", spokeCount: "28F/28R" }, sellerLink: "https://www.huntbikewheels.com/products/hunt-4-season-gravel-disc-wheelset" },
+                            { model: "Carbon Gravel Race", price: 1200, weight: 1450, brand: "Hunt", details: { material: "Carbon", innerRimWidth: "25mm", bearingType: "EZO Sealed Cartridge", axleType: "Thru Axle", tireType: "Tubeless Ready", spokeCount: "24F/24R" }, sellerLink: "https://www.huntbikewheels.com/products/hunt-carbon-gravel-race-disc-wheelset" }
+                        ],
+                        Mavic: [
+                            { model: "Allroad SL", price: 800, weight: 1790, brand: "Mavic", details: { rimMaterial: "Maxtal Aluminium", innerRimWidth: "22mm", bearingType: "QRM Auto", axleType: "Thru Axle", tireType: "Tubeless UST", spokeCount: "24F/24R" }, sellerLink: "https://www.mavic.com/nl-nl/allroad-sl-disc-road-wheels-v2540100.html" }
+                        ]
+                    },
+                    groupset: {
+                        Shimano: [
+                            { model: "GRX 600", price: 700, weight: 3000, brand: "Shimano", details: { speed: "1x11 or 2x11", brakeType: "Hydraulic Disc", shiftType: "Mechanical", chainrings: "40T (1x), 46/30T (2x)", cassetteOptions: "11-42T (1x), 11-34T (2x)", series: "RX600" }, sellerLink: "https://bike.shimano.com/nl-NL/product/component/grx-rx600/ST-RX600.html" },
+                            { model: "GRX 810 Di2", price: 1700, weight: 2800, brand: "Shimano", details: { speed: "1x11 or 2x11", brakeType: "Hydraulic Disc", shiftType: "Electronic Di2", chainrings: "42T (1x), 48/31T (2x)", cassetteOptions: "11-42T (1x), 11-34T (2x)", series: "RX810" }, sellerLink: "https://bike.shimano.com/nl-NL/product/component/grx-rx810-di2/ST-RX815.html" },
+                            { model: "GRX 400", price: 500, weight: 3200, brand: "Shimano", details: { speed: "2x10", brakeType: "Hydraulic Disc", shiftType: "Mechanical", chainrings: "46/30T", cassetteOptions: "11-36T", series: "RX400" }, sellerLink: "https://bike.shimano.com/nl-NL/product/component/grx-rx400/ST-RX400.html" }
+                        ],
+                        SRAM: [
+                            { model: "Apex 1", price: 600, weight: 3300, brand: "SRAM", details: { speed: "1x11", brakeType: "Hydraulic Disc", shiftType: "Mechanical", chainrings: "40T", cassetteOptions: "11-42T", series: "Apex" }, sellerLink: "https://www.sram.com/en/sram/road/series/sram-apex-1" },
+                            { model: "Rival XPLR AXS", price: 1400, weight: 2900, brand: "SRAM", details: { speed: "1x12", brakeType: "Hydraulic Disc", shiftType: "Electronic Wireless (AXS)", chainrings: "40T, 42T", cassetteOptions: "10-44T", series: "XPLR" }, sellerLink: "https://www.sram.com/en/sram/road/series/sram-rival-xplr-axs" },
+                            { model: "Force XPLR AXS", price: 1800, weight: 2700, brand: "SRAM", details: { speed: "1x12", brakeType: "Hydraulic Disc", shiftType: "Electronic Wireless (AXS)", chainrings: "40T, 42T", cassetteOptions: "10-44T", series: "XPLR" }, sellerLink: "https://www.sram.com/en/sram/road/series/sram-force-xplr-axs" }
+                        ]
+                    },
+                    handlebar: {
+                        Ritchey: [
+                            { model: "Comp ErgoMax", price: 80, weight: 320, brand: "Ritchey", details: { material: "6061 Double Butted Alloy", flare: "12 degree", drop: "128mm", reach: "73mm", clampDiameter: "31.8mm" }, sellerLink: "https://ritcheylogic.com/bike/handlebars/comp-ergomax-handlebar" }
+                        ],
+                        FSA: [
+                            { model: "Gossamer Compact", price: 70, weight: 310, brand: "FSA", details: { material: "AL6061 Aluminium", flare: "0 degree", drop: "125mm", reach: "80mm", clampDiameter: "31.8mm" }, sellerLink: "https://www.fullspeedahead.com/products/handlebars-road/gossamer-compact-handlebar" }
+                        ],
+                        Zipp: [
+                            { model: "Service Course SL-70 XPLR", price: 140, weight: 270, brand: "Zipp", details: { material: "7050 Aluminium", flare: "5 degree", drop: "115mm", reach: "70mm", clampDiameter: "31.8mm" }, sellerLink: "https://www.sram.com/en/zipp/components/handlebars/service-course-sl-70-xplr" }
+                        ]
+                    },
+                    stem: { // Stuurpen
+                        Zipp: [
+                            { model: "Service Course SL", price: 100, weight: 125, brand: "Zipp", details: { material: "7075 Aluminium", length: "100mm", angle: "6 degrees", clampDiameter: "31.8mm" }, sellerLink: "https://www.sram.com/en/zipp/components/stems/service-course-sl-stem" }
+                        ],
+                        Ritchey: [
+                            { model: "WCS C220", price: 80, weight: 135, brand: "Ritchey", details: { material: "2014 Alloy", length: "90mm", angle: "6 degrees", clampDiameter: "31.8mm" }, sellerLink: "https://ritcheylogic.com/bike/stems/wcs-c220-stem" }
+                        ],
+                        FSA: [
+                            { model: "OS-99 CSI", price: 110, weight: 130, brand: "FSA", details: { material: "Aluminium/Carbon Wrap", length: "100mm", angle: "6 degrees", clampDiameter: "31.8mm" }, sellerLink: "https://www.fullspeedahead.com/products/stems-road/os-99-csi-stem" }
+                        ]
+                    },
+                    integrated_cockpit: {
+                        Canyon: [
+                            { model: "CP0018 Aerocockpit", price: 400, weight: 350, brand: "Canyon", details: { material: "Carbon", width: "420mm", stemLength: "100mm", angle: "6 degrees", drop: "127mm", reach: "73mm", cableRouting: "Internal" }, sellerLink: "https://www.canyon.com/nl-nl/gear/components/cockpit/integrated-cockpits/canyon-cp0018-aerocockpit/9100767.html" }
+                        ],
+                        Syncros: [
+                            { model: "Creston iC SL X", price: 500, weight: 300, brand: "Syncros", details: { material: "Carbon", width: "400mm", stemLength: "100mm", angle: "8 degrees", drop: "125mm", reach: "75mm", cableRouting: "Internal" }, sellerLink: "https://www.syncros.com/nl/nl/product/syncros-creston-ic-sl-x-integrated-cockpit" }
+                        ]
+                    },
+                    saddle: {
+                        Specialized: [
+                            { model: "Power Comp", price: 120, weight: 240, brand: "Specialized", details: { shellMaterial: "Carbon Reinforced", railMaterial: "Cr-Mo", padding: "Level 2", widthOptions: "143mm, 155mm", length: "240mm", support: "Short Nose, Body Geometry" }, sellerLink: "https://www.specialized.com/nl/nl/power-comp/p/172605" }
+                        ],
+                        Brooks: [
+                            { model: "C17 Carved", price: 150, weight: 400, brand: "Brooks", details: { shellMaterial: "Vulcanised Natural Rubber", railMaterial: "Black Steel", padding: "N/A (Hammock)", widthOptions: "Standard", length: "283mm", support: "All-road, Weatherproof" }, sellerLink: "https://www.brooksengland.com/en_uk/c17-carved.html" }
+                        ],
+                        Selle_Royal: [
+                            { model: "Suez", price: 60, weight: 300, brand: "Selle_Royal", details: { shellMaterial: "Nylon", railMaterial: "Steel", padding: "Royalgel", widthOptions: "Standard", length: "260mm", support: "Moderate Riding Position, Gel Comfort" }, sellerLink: "https://www.selleroyal.com/en_eu/suez.html" }
+                        ]
+                    }
+                }
+            };
+
+            // DOM-elementen ophalen
+            const bikeTypeSelect = document.getElementById('bikeType');
+            const configModeSelect = document.getElementById('configMode');
+            const manualConfigurator = document.getElementById('manualConfigurator');
+            const autoConfigurator = document.getElementById('autoConfigurator');
+
+            // Elementen voor handmatige configuratie
+            const frameBrandSelect = document.getElementById('frameBrand');
+            const frameMaterialSelect = document.getElementById('frameMaterial');
+            const frameModelSelect = document.getElementById('frameModel');
+            const frameOutput = document.getElementById('frameOutput');
+
+            const wheelBrandSelect = document.getElementById('wheelBrand');
+            const wheelModelSelect = document.getElementById('wheelModel');
+            const wheelOutput = document.getElementById('wheelOutput');
+
+            const groupsetBrandSelect = document.getElementById('groupsetBrand');
+            const groupsetModelSelect = document.getElementById('groupsetModel');
+            const groupsetOutput = document.getElementById('groupsetOutput');
+
+            // NIEUWE Elementen voor Geïntegreerde Cockpit
+            const integratedCockpitBrandSelect = document.getElementById('integratedCockpitBrand');
+            const integratedCockpitModelSelect = document.getElementById('integratedCockpitModel');
+            const integratedCockpitOutput = document.getElementById('integratedCockpitOutput');
+
+            const handlebarSection = document.getElementById('handlebarSection'); // Sectie voor stuur
+            const handlebarBrandSelect = document.getElementById('handlebarBrand');
+            const handlebarModelSelect = document.getElementById('handlebarModel');
+            const handlebarOutput = document.getElementById('handlebarOutput');
+
+            const stemSection = document.getElementById('stemSection'); // Sectie voor stuurpen
+            const stemBrandSelect = document.getElementById('stemBrand');
+            const stemModelSelect = document.getElementById('stemModel');
+            const stemOutput = document.getElementById('stemOutput');
+
+            const saddleBrandSelect = document.getElementById('saddleBrand');
+            const saddleModelSelect = document.getElementById('saddleModel');
+            const saddleOutput = document.getElementById('saddleOutput');
+
+            // Elementen voor automatische configuratie
+            const budgetInput = document.getElementById('budgetInput');
+            const frameMaterialPreferenceSelect = document.getElementById('frameMaterialPreference');
+            const favoriteBrandPreferenceSelect = document.getElementById('favoriteBrandPreference');
+            const surpriseMeCheckbox = document.getElementById('surpriseMe');
+            const generateBikeButton = document.getElementById('generateBikeButton');
+            const budgetOutput = document.getElementById('budgetOutput');
+            const budgetLoadingIndicator = document.getElementById('budgetLoadingIndicator');
+
+            // Elementen voor samenvatting
+            const selectedPartsSummary = document.getElementById('selectedPartsSummary');
+            const finalTotalOutput = document.getElementById('finalTotalOutput');
+            const orderBikeButton = document.getElementById('orderBikeButton');
+            const orderStatusMessage = document.getElementById('orderStatusMessage');
+
+            // Elementen voor de foutmelding pop-up
+            const errorModal = document.getElementById('errorModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const closeButton = document.querySelector('.close-button');
+            const modalOkButton = document.querySelector('.modal-ok-button');
+
+            // Opslag voor geselecteerde onderdelen
+            let selectedParts = {
+                frame: null,
+                wheels: null,
+                groupset: null,
+                handlebar: null, // Kan leeg zijn als integrated_cockpit is gekozen
+                stem: null,      // Kan leeg zijn als integrated_cockpit is gekozen
+                integrated_cockpit: null, // Nieuw
+                saddle: null
+            };
+
+            /**
+             * Toont de foutmelding pop-up.
+             * @param {string} title - De titel van de pop-up.
+             * @param {string} message - Het bericht dat in de pop-up wordt getoond.
+             */
+            function showErrorPopup(title, message) {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                errorModal.style.display = 'flex'; // Gebruik flex om de modal te centreren
+            }
+
+            /**
+             * Verbergt de foutmelding pop-up.
+             */
+            function hideErrorPopup() {
+                errorModal.style.display = 'none';
+            }
+
+            // Event listeners voor het sluiten van de modal
+            closeButton.addEventListener('click', hideErrorPopup);
+            modalOkButton.addEventListener('click', hideErrorPopup);
+            window.addEventListener('click', (event) => {
+                if (event.target === errorModal) { // Klik buiten de modal content
+                    hideErrorPopup();
+                }
+            });
+
+            /**
+             * Vult een dropdown-element met opties.
+             * @param {HTMLElement} selectElement - Het HTML select-element.
+             * @param {Array<Object>} options - Een array van objecten {value: string, text: string}.
+             * @param {boolean} [includeDefault=true] - Of een standaard 'Kies een optie...' moet worden toegevoegd.
+             * @param {string} [defaultText="Kies een optie..."] - De tekst voor de standaard optie.
+             */
+            function populateDropdown(selectElement, options, includeDefault = true, defaultText = "Kies een optie...") {
+                selectElement.innerHTML = ''; // Maak de dropdown leeg
+                if (includeDefault) {
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = defaultText;
+                    selectElement.appendChild(defaultOption);
+                }
+                options.forEach(option => {
+                    const opt = document.createElement('option');
+                    opt.value = option.value;
+                    opt.textContent = option.text;
+                    selectElement.appendChild(opt);
+                });
+            }
+
+            /**
+             * Haalt de merken voor een specifiek onderdeeltype op basis van het huidige fietstype.
+             * @param {string} partType - Het type onderdeel (e.g., 'frame', 'wheels', 'stem').
+             * @returns {Array<Object>} Een array van objecten {value: brandName, text: formattedBrandName}.
+             */
+            function getBrandsForPart(partType) {
+                const currentBikeType = bikeTypeSelect.value;
+                // Controleer of de partType bestaat in de data voor het huidige fietstype
+                if (!data[currentBikeType] || !data[currentBikeType][partType]) {
+                    return [];
+                }
+                const brands = Object.keys(data[currentBikeType][partType]);
+                return brands.map(brand => ({ value: brand, text: brand.replace(/_/g, ' ') }));
+            }
+
+
+            /**
+             * Haalt de materialen voor een specifiek framemerk op.
+             * @param {string} brand - De merknaam van het frame.
+             * @returns {Array<Object>} Een array van objecten {value: materialType, text: formattedMaterialType}.
+             */
+            function getMaterialsForFrameBrand(brand) {
+                const currentBikeType = bikeTypeSelect.value;
+                const materials = Object.keys(data[currentBikeType].frame[brand]);
+                return materials.map(material => ({ value: material, text: material.charAt(0).toUpperCase() + material.slice(1) }));
+            }
+
+            /**
+             * Haalt de modellen op voor een specifiek onderdeeltype, merk en optioneel materiaal.
+             * @param {string} partType - Het type onderdeel.
+             * @param {string} brand - De merknaam.
+             * @param {string} [material=null] - Het materiaal (alleen relevant voor frames).
+             * @returns {Array<Object>} Een array van objecten {value: modelName, text: formattedModelInfo}.
+             */
+            function getModelsForPart(partType, brand, material = null) {
+                const currentBikeType = bikeTypeSelect.value;
+                let models = [];
+                // Controleer of de paden bestaan voordat je probeert ze te benaderen
+                if (!data[currentBikeType] || !data[currentBikeType][partType] || !data[currentBikeType][partType][brand]) {
+                    return [];
+                }
+
+                if (material) { // Voor frames met onderscheid in materiaal
+                    models = data[currentBikeType][partType][brand][material] || [];
+                } else { // Voor andere onderdelen (wielen, groepssets, etc.)
+                    models = data[currentBikeType][partType][brand] || [];
+                }
+                return models.map(item => ({ value: item.model, text: `${item.model} (€${item.price}, ${item.weight}g)` }));
+            }
+
+            /**
+             * Categoriseert het remtype (schijfrem of velgrem) voor compatibiliteitscontroles.
+             * @param {Object} part - Het onderdeel object met een 'details' property die 'brakeType' bevat.
+             * @returns {string} 'Disc', 'Rim Brake', of 'Unknown'.
+             */
+            function getBrakeTypeCategory(part) {
+                if (!part || !part.details || !part.details.brakeType) {
+                    return "Unknown";
+                }
+                const brakeType = part.details.brakeType.toLowerCase();
+                if (brakeType.includes("disc")) {
+                    return "Disc";
+                }
+                // Controleer op 'rim brake' of 'rimbrake'
+                if (brakeType.includes("rim brake") || brakeType.includes("rimbrake")) {
+                    return "Rim Brake";
+                }
+                return "Unknown";
+            }
+
+            /**
+             * Controleert de compatibiliteit tussen geselecteerde onderdelen.
+             * @param {Object} parts - Het object met alle geselecteerde onderdelen (frame, groupset, etc.).
+             * @returns {string|null} Een foutbericht als er een incompatibiliteit is, anders null.
+             */
+            function checkCompatibility(parts) {
+                const frame = parts.frame;
+                const groupset = parts.groupset;
+                const handlebar = parts.handlebar;
+                const stem = parts.stem;
+                const integratedCockpit = parts.integrated_cockpit;
+
+                // 1. Remtype compatibiliteit: Frame en Groupset moeten matchen
+                if (frame && groupset) {
+                    const frameBrakeCategory = getBrakeTypeCategory(frame);
+                    const groupsetBrakeCategory = getBrakeTypeCategory(groupset);
+                    if (frameBrakeCategory !== "Unknown" && groupsetBrakeCategory !== "Unknown" && frameBrakeCategory !== groupsetBrakeCategory) {
+                        return `Het geselecteerde frame (${frame.brand} ${frame.model}, Remtype: ${frameBrakeCategory}) en de groepsset (${groupset.brand} ${groupset.model}, Remtype: ${groupsetBrakeCategory}) zijn incompatibel. Kies onderdelen met overeenkomende remsystemen.`;
+                    }
+                }
+
+                // 2. Stuur/Stuurpen/Geïntegreerde Cockpit compatibiliteit
+                if (integratedCockpit) {
+                    if (handlebar || stem) {
+                        return `Je kunt niet zowel een geïntegreerde cockpit als een los stuur en/of stuurpen selecteren. Kies één van de opties.`;
+                    }
+                } else {
+                    // Als geen geïntegreerde cockpit is gekozen, moeten beide stuur en stuurpen aanwezig zijn
+                    if (!handlebar || !stem) {
+                        // Dit is een waarschuwing voor onvolledigheid, geen strict compatibiliteitsprobleem per se,
+                        // maar essentieel voor een complete fiets.
+                        // De `updateSummary` functie zal dit ook opvangen voor de 'Bestel' knop.
+                        // Hier kunnen we eventueel een specifieker foutbericht geven.
+                        // Bijv.: return `Als je geen geïntegreerde cockpit kiest, moet je zowel een stuur als een stuurpen selecteren.`;
+                    }
+                }
+                
+                return null; // Geen compatibiliteitsfout gevonden
+            }
+
+            /**
+             * Schakelt de stuur- en stuurpen-dropdowns in/uit, en reset hun waarden.
+             * @param {boolean} disable - True om uit te schakelen, false om in te schakelen.
+             */
+            function toggleHandlebarAndStem(disable) {
+                handlebarBrandSelect.disabled = disable;
+                handlebarModelSelect.disabled = disable;
+                stemBrandSelect.disabled = disable;
+                stemModelSelect.disabled = disable;
+
+                if (disable) {
+                    handlebarBrandSelect.value = '';
+                    populateDropdown(handlebarModelSelect, [], true, "N/A (Cockpit Gekozen)");
+                    selectedParts.handlebar = null;
+                    handlebarOutput.textContent = '';
+                    handlebarOutput.classList.remove('error');
+                    handlebarSection.style.opacity = '0.5'; // Visuele indicatie
+
+                    stemBrandSelect.value = '';
+                    populateDropdown(stemModelSelect, [], true, "N/A (Cockpit Gekozen)");
+                    selectedParts.stem = null;
+                    stemOutput.textContent = '';
+                    stemOutput.classList.remove('error');
+                    stemSection.style.opacity = '0.5'; // Visuele indicatie
+                } else {
+                    // Resetten om de initial state te herstellen
+                    initializePartDropdowns('handlebar');
+                    initializePartDropdowns('stem');
+                    handlebarSection.style.opacity = '1';
+                    stemSection.style.opacity = '1';
+                }
+                updateSummary(); // Altijd de samenvatting bijwerken
+            }
+
+            /**
+             * Initialiseert de dropdowns voor een specifiek onderdeel (handmatige configuratie).
+             * @param {string} partType - Het type onderdeel (e.g., 'frame', 'wheels', 'stem').
+             */
+            function initializePartDropdowns(partType) {
+                const currentBikeType = bikeTypeSelect.value;
+                const brands = getBrandsForPart(partType);
+                let brandSelectElement, modelSelectElement, outputElement;
+
+                switch (partType) {
+                    case 'frame':
+                        brandSelectElement = frameBrandSelect;
+                        modelSelectElement = frameModelSelect;
+                        outputElement = frameOutput;
+                        populateDropdown(frameMaterialSelect, [], true, "Kies eerst een merk");
+                        break;
+                    case 'wheels':
+                        brandSelectElement = wheelBrandSelect;
+                        modelSelectElement = wheelModelSelect;
+                        outputElement = wheelOutput;
+                        break;
+                    case 'groupset':
+                        brandSelectElement = groupsetBrandSelect;
+                        modelSelectElement = groupsetModelSelect;
+                        outputElement = groupsetOutput;
+                        break;
+                    case 'handlebar':
+                        brandSelectElement = handlebarBrandSelect;
+                        modelSelectElement = handlebarModelSelect;
+                        outputElement = handlebarOutput;
+                        break;
+                    case 'stem':
+                        brandSelectElement = stemBrandSelect;
+                        modelSelectElement = stemModelSelect;
+                        outputElement = stemOutput;
+                        break;
+                    case 'integrated_cockpit': // NIEUW
+                        brandSelectElement = integratedCockpitBrandSelect;
+                        modelSelectElement = integratedCockpitModelSelect;
+                        outputElement = integratedCockpitOutput;
+                        break;
+                    case 'saddle':
+                        brandSelectElement = saddleBrandSelect;
+                        modelSelectElement = saddleModelSelect;
+                        outputElement = saddleOutput;
+                        break;
+                }
+
+                populateDropdown(brandSelectElement, brands);
+                populateDropdown(modelSelectElement, [], true, "Kies eerst een merk");
+                selectedParts[partType] = null;
+                outputElement.textContent = '';
+                outputElement.classList.remove('error');
+            }
+
+            /**
+             * Initialiseert alle dropdowns voor de handmatige configuratie.
+             */
+            function initializeManualConfigurator() {
+                initializePartDropdowns('frame');
+                initializePartDropdowns('wheels');
+                initializePartDropdowns('groupset');
+                initializePartDropdowns('integrated_cockpit'); // NIEUW
+                initializePartDropdowns('handlebar');
+                initializePartDropdowns('stem');
+                initializePartDropdowns('saddle');
+
+                // Zorg ervoor dat de stuur/stuurpen secties weer zichtbaar zijn bij initialisatie
+                handlebarSection.style.display = 'block';
+                stemSection.style.display = 'block';
+                handlebarSection.style.opacity = '1';
+                stemSection.style.opacity = '1';
+                
+                selectedParts = { frame: null, wheels: null, groupset: null, handlebar: null, stem: null, integrated_cockpit: null, saddle: null };
+                updateSummary();
+            }
+
+            /**
+             * Initialiseert de 'Favoriet merk' dropdown in de automatische configurator.
+             */
+            function initializeAutoConfiguratorBrands() {
+                const currentBikeType = bikeTypeSelect.value;
+                const availableFrameBrands = Object.keys(data[currentBikeType].frame);
+                const options = availableFrameBrands.map(brand => ({ value: brand, text: brand.replace(/_/g, ' ') }));
+                populateDropdown(favoriteBrandPreferenceSelect, options, true, "Geen voorkeur");
+            }
+
+            // --- Event Listeners voor handmatige configuratie ---
+
+            frameBrandSelect.addEventListener('change', async () => {
+                const brand = frameBrandSelect.value;
+                if (brand) {
+                    await new Promise(resolve => setTimeout(resolve, 300)); // Simulatie API call
+                    populateDropdown(frameMaterialSelect, getMaterialsForFrameBrand(brand));
+                    frameModelSelect.innerHTML = '<option value="">Kies eerst een materiaal</option>';
+                    selectedParts.frame = null; // Resetten wanneer merk verandert
+                    frameOutput.textContent = '';
+                } else {
+                    frameMaterialSelect.innerHTML = '<option value="">Kies eerst een merk</option>';
+                    frameModelSelect.innerHTML = '<option value="">Kies eerst een materiaal</option>';
+                    selectedParts.frame = null;
+                    frameOutput.textContent = '';
+                }
+                updateSummary();
+            });
+
+            frameMaterialSelect.addEventListener('change', async () => {
+                const brand = frameBrandSelect.value;
+                const material = frameMaterialSelect.value;
+                if (brand && material) {
+                    await new Promise(resolve => setTimeout(resolve, 300)); // Simulatie API call
+                    populateDropdown(frameModelSelect, getModelsForPart('frame', brand, material));
+                    selectedParts.frame = null; // Resetten wanneer materiaal verandert
+                    frameOutput.textContent = '';
+                } else {
+                    frameModelSelect.innerHTML = '<option value="">Kies eerst een materiaal</option>';
+                    selectedParts.frame = null;
+                    frameOutput.textContent = '';
+                }
+                updateSummary();
+            });
+
+            frameModelSelect.addEventListener('change', async () => {
+                const brand = frameBrandSelect.value;
+                const material = frameMaterialSelect.value;
+                const model = frameModelSelect.value;
+                if (brand && material && model) {
+                    await new Promise(resolve => setTimeout(resolve, 300)); // Simulatie API call
+                    selectedParts.frame = data[bikeTypeSelect.value].frame[brand][material].find(item => item.model === model);
+                    if (selectedParts.frame) {
+                        frameOutput.textContent = `Gekozen: ${selectedParts.frame.brand} ${selectedParts.frame.model} (€${selectedParts.frame.price}, ${selectedParts.frame.weight}g)`;
+                        frameOutput.classList.remove('error');
+                    }
+
+                    const compatibilityError = checkCompatibility(selectedParts);
+                    if (compatibilityError) {
+                        showErrorPopup("Incompatibiliteit gedetecteerd!", compatibilityError + "\nPas uw selectie aan.");
+                    }
+                } else {
+                    selectedParts.frame = null;
+                    frameOutput.textContent = 'Selecteer een geldig frame.';
+                    frameOutput.classList.add('error');
+                }
+                updateSummary();
+            });
+
+            /**
+             * Stelt event listeners in voor algemene onderdelen (wielen, groepsset, stuur, stuurpen, zadel).
+             * @param {string} partType - Het type onderdeel.
+             * @param {HTMLElement} brandSelect - De merk dropdown.
+             * @param {HTMLElement} modelSelect - De model dropdown.
+             * @param {HTMLElement} outputElement - Het output element.
+             */
+            function setupPartSelection(partType, brandSelect, modelSelect, outputElement) {
+                brandSelect.addEventListener('change', async () => {
+                    const brand = brandSelect.value;
+                    if (brand) {
+                        await new Promise(resolve => setTimeout(resolve, 300)); // Simulatie API call
+                        populateDropdown(modelSelect, getModelsForPart(partType, brand));
+                        selectedParts[partType] = null;
+                        outputElement.textContent = '';
+                    } else {
+                        populateDropdown(modelSelect, [], true, "Kies eerst een merk");
+                        selectedParts[partType] = null;
+                        outputElement.textContent = '';
+                    }
+                    updateSummary();
+                });
+
+                modelSelect.addEventListener('change', async () => {
+                    const brand = brandSelect.value;
+                    const model = modelSelect.value;
+                    if (brand && model) {
+                        await new Promise(resolve => setTimeout(resolve, 300)); // Simulatie API call
+                        selectedParts[partType] = data[bikeTypeSelect.value][partType][brand].find(item => item.model === model);
+                        if (selectedParts[partType]) {
+                            outputElement.textContent = `Gekozen: ${selectedParts[partType].brand} ${selectedParts[partType].model} (€${selectedParts[partType].price}, ${selectedParts[partType].weight}g)`;
+                            outputElement.classList.remove('error');
+                        }
+
+                        const compatibilityError = checkCompatibility(selectedParts);
+                        if (compatibilityError) {
+                            showErrorPopup("Incompatibiliteit gedetecteerd!", compatibilityError + "\nPas uw selectie aan.");
+                        }
+                    } else {
+                        selectedParts[partType] = null;
+                        outputElement.textContent = `Selecteer een geldig ${partType.replace(/_/g, ' ')}.`;
+                        outputElement.classList.add('error');
+                    }
+                    updateSummary();
+                });
+            }
+
+            setupPartSelection('wheels', wheelBrandSelect, wheelModelSelect, wheelOutput);
+            setupPartSelection('groupset', groupsetBrandSelect, groupsetModelSelect, groupsetOutput);
+            setupPartSelection('handlebar', handlebarBrandSelect, handlebarModelSelect, handlebarOutput);
+            setupPartSelection('stem', stemBrandSelect, stemModelSelect, stemOutput);
+            setupPartSelection('saddle', saddleBrandSelect, saddleModelSelect, saddleOutput);
+
+            // NIEUW: Event listener voor geïntegreerde cockpit
+            integratedCockpitBrandSelect.addEventListener('change', async () => {
+                const brand = integratedCockpitBrandSelect.value;
+                if (brand) {
+                    await new Promise(resolve => setTimeout(resolve, 300)); // Simulatie API call
+                    populateDropdown(integratedCockpitModelSelect, getModelsForPart('integrated_cockpit', brand));
+                    selectedParts.integrated_cockpit = null;
+                    integratedCockpitOutput.textContent = '';
+                    integratedCockpitOutput.classList.remove('error');
+                    toggleHandlebarAndStem(true); // Schakel stuur/stuurpen uit
+                } else {
+                    populateDropdown(integratedCockpitModelSelect, [], true, "Kies eerst een merk");
+                    selectedParts.integrated_cockpit = null;
+                    integratedCockpitOutput.textContent = '';
+                    integratedCockpitOutput.classList.remove('error');
+                    toggleHandlebarAndStem(false); // Schakel stuur/stuurpen in
+                }
+                updateSummary();
+            });
+
+            integratedCockpitModelSelect.addEventListener('change', async () => {
+                const brand = integratedCockpitBrandSelect.value;
+                const model = integratedCockpitModelSelect.value;
+                if (brand && model) {
+                    await new Promise(resolve => setTimeout(resolve, 300)); // Simulatie API call
+                    selectedParts.integrated_cockpit = data[bikeTypeSelect.value].integrated_cockpit[brand].find(item => item.model === model);
+                    if (selectedParts.integrated_cockpit) {
+                        integratedCockpitOutput.textContent = `Gekozen: ${selectedParts.integrated_cockpit.brand} ${selectedParts.integrated_cockpit.model} (€${selectedParts.integrated_cockpit.price}, ${selectedParts.integrated_cockpit.weight}g)`;
+                        integratedCockpitOutput.classList.remove('error');
+                        toggleHandlebarAndStem(true); // Schakel stuur/stuurpen uit
+                    }
+                    const compatibilityError = checkCompatibility(selectedParts);
+                    if (compatibilityError) {
+                        showErrorPopup("Incompatibiliteit gedetecteerd!", compatibilityError + "\nPas uw selectie aan.");
+                    }
+                } else {
+                    selectedParts.integrated_cockpit = null;
+                    integratedCockpitOutput.textContent = `Selecteer een geldige geïntegreerde cockpit.`;
+                    integratedCockpitOutput.classList.add('error');
+                    toggleHandlebarAndStem(false); // Schakel stuur/stuurpen in
+                }
+                updateSummary();
+            });
+
+
+            /**
+             * Werkt de samenvatting van de geselecteerde onderdelen en de totaalprijs/-gewicht bij.
+             * Toont ook de "Bestel jouw Fiets!" knop indien alle onderdelen zijn geselecteerd en compatibel zijn.
+             */
+            function updateSummary() {
+                let totalCost = 0;
+                let totalWeight = 0;
+                let summaryHtml = '<ul>';
+                let allRequiredPartsSelected = true;
+
+                // Definieer de volgorde van de onderdelen voor de samenvatting
+                const partOrder = ['frame', 'groupset', 'wheels', 'integrated_cockpit', 'handlebar', 'stem', 'saddle'];
+
+                for (const partType of partOrder) {
+                    let part = selectedParts[partType];
+
+                    // Bepaal of het onderdeel 'nodig' is en of het geselecteerd is
+                    let isRequired = true;
+                    if (partType === 'handlebar' || partType === 'stem') {
+                        isRequired = !selectedParts.integrated_cockpit; // Nodig als geen geïntegreerde cockpit
+                    } else if (partType === 'integrated_cockpit') {
+                        isRequired = !selectedParts.handlebar && !selectedParts.stem; // Nodig als los stuur/stuurpen niet geselecteerd zijn
+                    }
+
+                    if (isRequired) {
+                        if (part) {
+                            totalCost += part.price;
+                            totalWeight += part.weight;
+                            summaryHtml += `
+                                <li>
+                                    <strong>${partType.charAt(0).toUpperCase() + partType.slice(1).replace(/_/g, ' ')}: ${part.brand} ${part.model}</strong><br>
+                                    <span class="detail-item">Prijs: €${part.price}</span> | 
+                                    <span class="detail-item">Gewicht: ${part.weight}g</span>
+                                    ${part.details ? '<br>' + Object.entries(part.details).map(([key, value]) => {
+                                        const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                                        return `<span class="detail-item">${formattedKey}: ${value}</span>`;
+                                    }).join(' | ') : ''}
+                                    ${part.sellerLink ? `<br><span class="seller-link"><a href="${part.sellerLink}" target="_blank">Bekijk bij verkoper</a></span>` : ''}
+                                </li>
+                            `;
+                        } else {
+                            allRequiredPartsSelected = false;
+                        }
+                    } else {
+                        // Als het onderdeel niet vereist is (bijv. los stuur als cockpit gekozen is), toon het niet in de samenvatting
+                        // en het beïnvloedt `allRequiredPartsSelected` niet.
+                    }
+                }
+                summaryHtml += '</ul>';
+
+                if (totalCost > 0 || configModeSelect.value === 'auto') {
+                    selectedPartsSummary.innerHTML = summaryHtml;
+                    const placeholder = document.querySelector('#selectedPartsSummary .placeholder-text');
+                    if (placeholder) {
+                        placeholder.remove();
+                    }
+                } else {
+                    selectedPartsSummary.innerHTML = '<p class="placeholder-text">Selecteer onderdelen of genereer een fiets om het overzicht te zien.</p>';
+                }
+
+                finalTotalOutput.textContent = `Totaalprijs: €${totalCost} | Gewicht: ${totalWeight}g`;
+
+                const compatibilityError = checkCompatibility(selectedParts);
+                
+                if (allRequiredPartsSelected && totalCost > 0 && !compatibilityError) {
+                    orderBikeButton.style.display = 'block';
+                } else {
+                    orderBikeButton.style.display = 'none';
+                }
+            }
+
+            /**
+             * Schakelt tussen de handmatige en automatische configuratiemodus.
+             */
+            configModeSelect.addEventListener('change', () => {
+                if (configModeSelect.value === 'manual') {
+                    manualConfigurator.classList.add('active');
+                    autoConfigurator.classList.remove('active');
+                    initializeManualConfigurator(); // Reset handmatige velden
+                    budgetOutput.textContent = ''; // Maak budget output leeg
+                } else {
+                    manualConfigurator.classList.remove('active');
+                    autoConfigurator.classList.add('active');
+                    // Maak handmatige selectie leeg bij het wisselen naar auto
+                    selectedParts = { frame: null, wheels: null, groupset: null, handlebar: null, stem: null, integrated_cockpit: null, saddle: null };
+                    updateSummary();
+                    initializeAutoConfiguratorBrands(); // Vul merken voor auto-modus
+                }
+                orderStatusMessage.style.display = 'none'; // Verberg orderstatus
+            });
+
+            /**
+             * Reageert op wijzigingen in het geselecteerde fietstype.
+             * Reset geselecteerde onderdelen en initialiseert configurators opnieuw.
+             */
+            bikeTypeSelect.addEventListener('change', () => {
+                selectedParts = { frame: null, wheels: null, groupset: null, handlebar: null, stem: null, integrated_cockpit: null, saddle: null };
+                updateSummary();
+                orderStatusMessage.style.display = 'none'; // Verberg orderstatus
+
+                if (configModeSelect.value === 'manual') {
+                    initializeManualConfigurator();
+                } else {
+                    initializeAutoConfiguratorBrands();
+                    budgetOutput.textContent = ''; // Maak budget output leeg wanneer fietstype verandert in auto-modus
+                }
+            });
+
+            /**
+             * Genereert automatisch een fiets op basis van het ingevoerde budget en voorkeuren.
+             * Probeert een compatibele combinatie te vinden.
+             */
+            generateBikeButton.addEventListener('click', async () => {
+                const budget = parseInt(budgetInput.value);
+                const currentBikeType = bikeTypeSelect.value;
+                const frameMaterialPref = frameMaterialPreferenceSelect.value;
+                const favBrandPref = favoriteBrandPreferenceSelect.value;
+                const surpriseMe = surpriseMeCheckbox.checked;
+
+                if (isNaN(budget) || budget <= 0) {
+                    budgetOutput.textContent = 'Voer een geldig budget in.';
+                    budgetOutput.classList.add('error');
+                    return;
+                }
+
+                budgetLoadingIndicator.style.display = 'block';
+                budgetOutput.textContent = '';
+                budgetOutput.classList.remove('error');
+                selectedPartsSummary.innerHTML = '<p class="placeholder-text">Fiets wordt samengesteld op basis van uw budget...</p>';
+                finalTotalOutput.textContent = `Totaalprijs: €0 | Gewicht: 0g`;
+                orderBikeButton.style.display = 'none';
+                orderStatusMessage.style.display = 'none';
+
+                await new Promise(resolve => setTimeout(resolve, 1500)); // Simuleer laadtijd
+
+                let bestCombination = null;
+                let minDifference = Infinity; // Verschil tussen budget en totale kosten
+
+                // Onderdelen categorieën
+                const partTypes = ['frame', 'wheels', 'groupset', 'handlebar', 'stem', 'integrated_cockpit', 'saddle'];
+                const availableParts = {};
+
+                // Verzamel alle mogelijke onderdelen voor het huidige fietstype
+                for (const partType of partTypes) {
+                    availableParts[partType] = [];
+                    const brands = data[currentBikeType][partType];
+                    for (const brandName in brands) {
+                        const brandData = brands[brandName];
+                        if (partType === 'frame') {
+                            for (const materialType in brandData) {
+                                if (surpriseMe || frameMaterialPref === 'any' || materialType === frameMaterialPref) {
+                                    availableParts[partType].push(...brandData[materialType]);
+                                }
+                            }
+                        } else {
+                            availableParts[partType].push(...brandData);
+                        }
+                    }
+                    availableParts[partType].sort((a, b) => a.price - b.price);
+                }
+
+                let filteredFrames = availableParts.frame;
+                if (!surpriseMe) {
+                    if (frameMaterialPref !== 'any') {
+                        filteredFrames = filteredFrames.filter(f => {
+                            const materialFromDetails = f.details && f.details.materialComposition ? f.details.materialComposition.toLowerCase() : '';
+                            return materialFromDetails.includes(frameMaterialPref);
+                        });
+                    }
+                    if (favBrandPref !== 'any') {
+                        filteredFrames = filteredFrames.filter(f => f.brand.replace(/_/g, ' ') === favBrandPref.replace(/_/g, ' '));
+                    }
+                }
+                if (filteredFrames.length === 0) {
+                    budgetOutput.textContent = 'Geen frames gevonden met de opgegeven voorkeuren. Probeer andere filters.';
+                    budgetOutput.classList.add('error');
+                    budgetLoadingIndicator.style.display = 'none';
+                    return;
+                }
+
+                let foundCompatibleBike = false;
+                const maxInitialCombinationsToTry = 10000;
+                let initialAttempts = 0;
+
+                // Loop door frames en groepssets om een compatibele basis te vinden (remtypen)
+                for (const frameCandidate of filteredFrames) {
+                    for (const groupsetCandidate of availableParts.groupset) {
+                        initialAttempts++;
+                        if (initialAttempts > maxInitialCombinationsToTry) break;
+
+                        // Check voor remtype compatibiliteit (belangrijkste check)
+                        const tempBaseParts = {
+                            frame: frameCandidate,
+                            groupset: groupsetCandidate,
+                            wheels: availableParts.wheels[0],
+                            saddle: availableParts.saddle[0],
+                            handlebar: null, // Placeholder om te voorkomen dat checkCompatibility crasht
+                            stem: null,      // Placeholder om te voorkomen dat checkCompatibility crasht
+                            integrated_cockpit: null // Placeholder om te voorkomen dat checkCompatibility crasht
+                        };
+                        const brakeCompatibilityError = checkCompatibility(tempBaseParts);
+
+                        if (!brakeCompatibilityError) {
+                            // Probeer met los stuur en stuurpen
+                            if (availableParts.handlebar.length > 0 && availableParts.stem.length > 0) {
+                                const tempFullParts = {
+                                    ...tempBaseParts,
+                                    handlebar: availableParts.handlebar[0],
+                                    stem: availableParts.stem[0],
+                                    integrated_cockpit: null // Zorg dat deze null is
+                                };
+                                // Hier check je niet de compatibiliteit van het stuur/stuurpen omdat die al is afgedwongen in de UI
+                                // en de `checkCompatibility` in dit scenario `null` retourneert (geen fout).
+                                const currentCost = tempFullParts.frame.price + tempFullParts.groupset.price + tempFullParts.wheels.price + tempFullParts.handlebar.price + tempFullParts.stem.price + tempFullParts.saddle.price;
+                                if (currentCost <= budget) {
+                                    const currentWeight = tempFullParts.frame.weight + tempFullParts.groupset.weight + tempFullParts.wheels.weight + tempFullParts.handlebar.weight + tempFullParts.stem.weight + tempFullParts.saddle.weight;
+                                    const difference = budget - currentCost;
+                                    if (difference < minDifference) {
+                                        bestCombination = { ...tempFullParts, totalCost: currentCost, totalWeight: currentWeight };
+                                        minDifference = difference;
+                                        foundCompatibleBike = true;
+                                        if (minDifference === 0) break;
+                                    }
+                                }
+                            }
+
+                            // Probeer met geïntegreerde cockpit (als beschikbaar en budget het toelaat)
+                            if (availableParts.integrated_cockpit.length > 0) {
+                                const tempFullParts = {
+                                    ...tempBaseParts,
+                                    integrated_cockpit: availableParts.integrated_cockpit[0],
+                                    handlebar: null, // Zorg dat deze null is
+                                    stem: null       // Zorg dat deze null is
+                                };
+                                const currentCost = tempFullParts.frame.price + tempFullParts.groupset.price + tempFullParts.wheels.price + tempFullParts.integrated_cockpit.price + tempFullParts.saddle.price;
+                                if (currentCost <= budget) {
+                                    const currentWeight = tempFullParts.frame.weight + tempFullParts.groupset.weight + tempFullParts.wheels.weight + tempFullParts.integrated_cockpit.weight + tempFullParts.saddle.weight;
+                                    const difference = budget - currentCost;
+                                    if (difference < minDifference) {
+                                        bestCombination = { ...tempFullParts, totalCost: currentCost, totalWeight: currentWeight };
+                                        minDifference = difference;
+                                        foundCompatibleBike = true;
+                                        if (minDifference === 0) break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (foundCompatibleBike && minDifference === 0) break;
+                    if (initialAttempts > maxInitialCombinationsToTry) break;
+                }
+
+                // Stap 2: Als een basis compatibele combinatie is gevonden, probeer dan de andere onderdelen te upgraden
+                if (bestCombination && foundCompatibleBike) {
+                    const partsToUpgrade = ['wheels', 'saddle'];
+                    if (bestCombination.handlebar && bestCombination.stem) { // Alleen upgraden als los stuur/stuurpen is gekozen
+                        partsToUpgrade.push('handlebar', 'stem');
+                    } else if (bestCombination.integrated_cockpit) { // Alleen upgraden als geïntegreerde cockpit is gekozen
+                        partsToUpgrade.push('integrated_cockpit');
+                    }
+                    
+                    const maxUpgradeAttempts = 500;
+                    for (let i = 0; i < maxUpgradeAttempts; i++) {
+                        const partTypeToUpgrade = partsToUpgrade[Math.floor(Math.random() * partsToUpgrade.length)];
+                        
+                        let currentPartIndex;
+                        let nextPartCandidate = null;
+
+                        // Zoek de index van het huidige onderdeel in de beschikbare onderdelenlijst.
+                        // Gebruik de juiste lijst afhankelijk van of het een geïntegreerde cockpit is of losse onderdelen.
+                        if (partTypeToUpgrade === 'integrated_cockpit') {
+                             currentPartIndex = availableParts.integrated_cockpit.findIndex(ic => ic.model === bestCombination.integrated_cockpit.model);
+                             if (currentPartIndex + 1 < availableParts.integrated_cockpit.length) {
+                                 nextPartCandidate = availableParts.integrated_cockpit[currentPartIndex + 1];
+                             }
+                        } else {
+                            currentPartIndex = availableParts[partTypeToUpgrade].findIndex(p => p.model === bestCombination[partTypeToUpgrade].model);
+                            if (currentPartIndex + 1 < availableParts[partTypeToUpgrade].length) {
+                                nextPartCandidate = availableParts[partTypeToUpgrade][currentPartIndex + 1];
+                            }
+                        }
+
+                        if (nextPartCandidate) {
+                            let tempSelectedParts = { ...bestCombination };
+                            tempSelectedParts[partTypeToUpgrade] = nextPartCandidate;
+
+                            const newTotalCost = tempSelectedParts.frame.price + tempSelectedParts.groupset.price +
+                                                 (tempSelectedParts.wheels ? tempSelectedParts.wheels.price : 0) +
+                                                 (tempSelectedParts.handlebar ? tempSelectedParts.handlebar.price : 0) +
+                                                 (tempSelectedParts.stem ? tempSelectedParts.stem.price : 0) +
+                                                 (tempSelectedParts.integrated_cockpit ? tempSelectedParts.integrated_cockpit.price : 0) +
+                                                 (tempSelectedParts.saddle ? tempSelectedParts.saddle.price : 0);
+                            
+                            const newTotalWeight = tempSelectedParts.frame.weight + tempSelectedParts.groupset.weight +
+                                                   (tempSelectedParts.wheels ? tempSelectedParts.wheels.weight : 0) +
+                                                   (tempSelectedParts.handlebar ? tempSelectedParts.handlebar.weight : 0) +
+                                                   (tempSelectedParts.stem ? tempSelectedParts.stem.weight : 0) +
+                                                   (tempSelectedParts.integrated_cockpit ? tempSelectedParts.integrated_cockpit.weight : 0) +
+                                                   (tempSelectedParts.saddle ? tempSelectedParts.saddle.weight : 0);
+
+                            const compatibilityErrorForUpgrade = checkCompatibility(tempSelectedParts);
+
+                            if (!compatibilityErrorForUpgrade && newTotalCost <= budget) {
+                                const newDifference = budget - newTotalCost;
+                                if (newDifference < minDifference) {
+                                    bestCombination = {
+                                        ...tempSelectedParts,
+                                        totalCost: newTotalCost,
+                                        totalWeight: newTotalWeight
+                                    };
+                                    minDifference = newDifference;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (bestCombination && foundCompatibleBike) {
+                    selectedParts.frame = bestCombination.frame;
+                    selectedParts.wheels = bestCombination.wheels;
+                    selectedParts.groupset = bestCombination.groupset;
+                    selectedParts.handlebar = bestCombination.handlebar;
+                    selectedParts.stem = bestCombination.stem;
+                    selectedParts.integrated_cockpit = bestCombination.integrated_cockpit;
+                    selectedParts.saddle = bestCombination.saddle;
+
+                    budgetOutput.textContent = `Fiets samengesteld! Totaalprijs: €${bestCombination.totalCost} (nog €${budget - bestCombination.totalCost} over)`;
+                    budgetOutput.classList.remove('error');
+                    updateSummary();
+                } else {
+                    budgetOutput.textContent = 'Kan geen geschikte fiets vinden binnen dit budget met de gegeven voorkeuren en compatibiliteitseisen.';
+                    budgetOutput.classList.add('error');
+                }
+                budgetLoadingIndicator.style.display = 'none';
+            });
+
+            /**
+             * Schakelt de voorkeursdropdowns uit/in wanneer "Verras me!" wordt aangevinkt.
+             */
+            surpriseMeCheckbox.addEventListener('change', () => {
+                const isDisabled = surpriseMeCheckbox.checked;
+                frameMaterialPreferenceSelect.disabled = isDisabled;
+                favoriteBrandPreferenceSelect.disabled = isDisabled;
+            });
+
+            // Bestelknop logica (simulatie)
+            orderBikeButton.addEventListener('click', () => {
+                orderStatusMessage.style.display = 'block';
+                orderStatusMessage.textContent = 'Bestelling geplaatst! We nemen spoedig contact met u op.';
+                orderStatusMessage.classList.remove('error'); // Zorg ervoor dat het een succesbericht-stijl is
+                // Hier zou je echte bestellogica implementeren, bijv. verzenden naar een backend.
+            });
+
+            // Initiële setup bij het laden van de pagina
+            initializeManualConfigurator(); // Initialiseer handmatig eerst, omdat dit standaard actief is
+            initializeAutoConfiguratorBrands(); // Vul ook de merken voor de auto-modus
+            updateSummary(); // Werk de samenvatting bij
+        });
+    </script>
+</body>
+</html>
