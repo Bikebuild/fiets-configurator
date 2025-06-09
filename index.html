@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiets Configurator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .config-label {
+            @apply block text-sm font-medium text-gray-700 mb-1;
+        }
+        .config-select {
+            @apply mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md;
+        }
+        .price-tag {
+            @apply bg-indigo-600 text-white text-3xl font-bold py-4 px-6 rounded-lg shadow-lg transition-transform duration-300 ease-in-out;
+        }
+        .summary-card {
+            @apply bg-white p-6 rounded-lg shadow-md;
+        }
+        .type-btn {
+            @apply w-full px-4 py-3 text-lg font-semibold border-2 border-gray-300 rounded-lg transition-colors duration-200 ease-in-out;
+        }
+        .type-btn.active {
+            @apply bg-indigo-600 text-white border-indigo-600;
+        }
+         .type-btn:not(.active) {
+            @apply bg-white text-gray-700 hover:bg-gray-100 hover:border-gray-400;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900">Stel jouw droomfiets samen</h1>
+            <p class="mt-2 text-lg text-gray-600">Kies je fietstype, merk, model en onderdelen en zie direct de prijs.</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Configuration Panel -->
+            <div class="lg:col-span-2 bg-white p-8 rounded-xl shadow-lg">
+                <div class="space-y-6">
+                    <!-- Fietstype Selectie -->
+                    <div>
+                        <label class="config-label">1. Kies een fietstype</label>
+                        <div id="bike-type-selector" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
+                            <button class="type-btn" data-type="race">Racefiets</button>
+                            <button class="type-btn" data-type="gravel">Gravelbike</button>
+                            <button class="type-btn" data-type="mtb">Mountainbike</button>
+                        </div>
+                    </div>
+                    
+                    <div id="main-config" class="space-y-6 hidden">
+                        <!-- Merk Selectie -->
+                        <div>
+                            <label for="brand" class="config-label">2. Kies een merk</label>
+                            <select id="brand" name="brand" class="config-select">
+                                <option value="">-- Selecteer een merk --</option>
+                            </select>
+                        </div>
+
+                        <!-- Model Selectie -->
+                        <div>
+                            <label for="model" class="config-label">3. Kies een model</label>
+                            <select id="model" name="model" class="config-select" disabled>
+                                <option value="">-- Kies eerst een merk --</option>
+                            </select>
+                        </div>
+
+                        <!-- Onderdelen sectie -->
+                        <div id="components" class="space-y-6 hidden pt-4 border-t border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800">4. Kies je onderdelen</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div><label for="wheels" class="config-label">Wielen</label><select id="wheels" data-component="wheels" class="config-select component-select"></select></div>
+                                <div><label for="groupset" class="config-label">Groepset</label><select id="groupset" data-component="groupset" class="config-select component-select"></select></div>
+                                <div><label for="saddle" class="config-label">Zadel</label><select id="saddle" data-component="saddle" class="config-select component-select"></select></div>
+                                <div><label for="handlebar" class="config-label">Stuur</label><select id="handlebar" data-component="handlebar" class="config-select component-select"></select></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary and Price -->
+            <div class="lg:col-span-1">
+                <div class="summary-card sticky top-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Jouw Configuratie</h2>
+                    <div id="summary-content" class="text-gray-600 space-y-2 mb-6 min-h-[100px]">
+                        <p>Kies een fietstype om te beginnen.</p>
+                    </div>
+                    <div class="border-t border-gray-200 pt-6">
+                        <p class="text-sm text-gray-500 mb-2">Totaalprijs</p>
+                        <div id="total-price" class="price-tag text-center mb-4">
+                            € 0,00
+                        </div>
+                        <button id="order-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            Plaats Bestelling
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Order Modal -->
+    <div id="order-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-sm w-full text-center">
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">Bestelling Ontvangen!</h3>
+            <p class="text-gray-600 mb-6">Bedankt voor je bestelling. We nemen zo snel mogelijk contact met je op.</p>
+            <button id="close-modal-btn" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-indigo-700 transition-colors">Sluiten</button>
+        </div>
+    </div>
+
+
+    <script>
+        // --- DATA ---
+        // 'type' toegevoegd aan elk model voor de filtering.
+        const bikeData = {
+            "Cube": {
+                "Agree C:62": { type: "race", basePrice: 1899, components: { wheels: [{ name: "Standaard Wielset", price: 0 }, { name: "Fulcrum Racing 77", price: 150 }], groupset: [{ name: "Standaard Shimano 105", price: 0 }, { name: "Shimano Ultegra", price: 400 }], saddle: [{ name: "Standaard Zadel", price: 0 }], handlebar: [{ name: "Standaard Stuur", price: 0 }] } },
+                "Litening AIR C:68X": { type: "race", basePrice: 4599, components: { wheels: [{ name: "Standaard Newmen Advanced SL", price: 0 }], groupset: [{ name: "Standaard Shimano Ultegra Di2", price: 0 }, { name: "Shimano Dura-Ace Di2", price: 1500 }], saddle: [{ name: "Standaard Zadel Prologo", price: 0 }], handlebar: [{ name: "Standaard Stuur/Stuurpen-unit", price: 0 }] } },
+                "Nuroad C:62": { type: "gravel", basePrice: 2299, components: { wheels: [{ name: "Standaard Cube GR 2.3", price: 0 }, { name: "Newmen Evolution SL X.R.25", price: 300 }], groupset: [{ name: "Standaard Shimano GRX 800", price: 0 }, { name: "Shimano GRX Di2", price: 1200 }], saddle: [{ name: "Standaard Natural Fit Nuance", price: 0 }], handlebar: [{ name: "Standaard Cube Gravel Race Bar", price: 0 }] } },
+                "Stereo 150 C:62": { type: "mtb", basePrice: 3599, components: { wheels: [{ name: "Standaard Newmen Evolution SL A.30", price: 0 }], groupset: [{ name: "Standaard Sram GX Eagle", price: 0 }, { name: "Shimano XT", price: 250 }], saddle: [{ name: "Standaard Natural Fit Venec", price: 0 }], handlebar: [{ name: "Standaard Race Face Turbine R 35", price: 0 }] } }
+            },
+            "Specialized": {
+                "Tarmac SL8": { type: "race", basePrice: 6000, components: { wheels: [{ name: "Standaard Roval Rapide CL II", price: 0 }], groupset: [{ name: "Standaard Shimano Ultegra Di2", price: 0 }, { name: "SRAM RED eTap AXS", price: 1800 }], saddle: [{ name: "Standaard Body Geometry Power Pro", price: 0 }], handlebar: [{ name: "Standaard Roval Rapide Cockpit", price: 0 }] } },
+                "Aethos Comp": { type: "race", basePrice: 3800, components: { wheels: [{ name: "Standaard DT Swiss R470", price: 0 }], groupset: [{ name: "Standaard Shimano 105 Di2", price: 0 }], saddle: [{ name: "Standaard Body Geometry Power Sport", price: 0 }], handlebar: [{ name: "Standaard Specialized Shallow Drop", price: 0 }] } },
+                "Diverge STR": { type: "gravel", basePrice: 5500, components: { wheels: [{ name: "Standaard Roval Terra C", price: 0 }, { name: "Roval Terra CLX", price: 1400 }], groupset: [{ name: "Standaard SRAM Rival eTap AXS", price: 0 }], saddle: [{ name: "Standaard Body Geometry Power Sport", price: 0 }], handlebar: [{ name: "Standaard Specialized Adventure Gear", price: 0 }] } },
+                "Stumpjumper EVO": { type: "mtb", basePrice: 5200, components: { wheels: [{ name: "Standaard Roval Traverse 29", price: 0 }], groupset: [{ name: "Standaard SRAM GX Eagle", price: 0 }], saddle: [{ name: "Standaard Bridge Comp", price: 0 }], handlebar: [{ name: "Standaard Specialized Trail", price: 0 }] } }
+            }
+        };
+
+        // --- DOM ELEMENTEN ---
+        const typeSelector = document.getElementById('bike-type-selector');
+        const mainConfigDiv = document.getElementById('main-config');
+        const brandSelect = document.getElementById('brand');
+        const modelSelect = document.getElementById('model');
+        const componentsDiv = document.getElementById('components');
+        const componentSelects = document.querySelectorAll('.component-select');
+        const totalPriceEl = document.getElementById('total-price');
+        const summaryContentEl = document.getElementById('summary-content');
+        const orderBtn = document.getElementById('order-btn');
+        const orderModal = document.getElementById('order-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+
+
+        // --- STATE ---
+        let currentState = {
+            type: null,
+            brand: null,
+            model: null,
+            basePrice: 0,
+            components: {}
+        };
+        
+        // --- FUNCTIES ---
+
+        function formatPrice(number) {
+            return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(number);
+        }
+        
+        function handleTypeSelection(e) {
+            const selectedBtn = e.target.closest('.type-btn');
+            if (!selectedBtn) return;
+            
+            const type = selectedBtn.dataset.type;
+            currentState.type = type;
+
+            // Update button styles
+            document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+            selectedBtn.classList.add('active');
+
+            // Reset en toon volgende stappen
+            resetSelections(false);
+            mainConfigDiv.classList.remove('hidden');
+            summaryContentEl.innerHTML = '<p>Kies nu een merk en model.</p>';
+            populateBrands();
+        }
+
+        function populateBrands() {
+            const availableBrands = new Set();
+            for (const brand in bikeData) {
+                for (const model in bikeData[brand]) {
+                    if (bikeData[brand][model].type === currentState.type) {
+                        availableBrands.add(brand);
+                        break;
+                    }
+                }
+            }
+            
+            brandSelect.innerHTML = '<option value="">-- Selecteer een merk --</option>';
+            availableBrands.forEach(brand => {
+                const option = document.createElement('option');
+                option.value = brand;
+                option.textContent = brand;
+                brandSelect.appendChild(option);
+            });
+            
+            resetSelections(true);
+        }
+
+        function populateModels() {
+            const brand = brandSelect.value;
+            modelSelect.innerHTML = '<option value="">-- Kies een model --</option>';
+            modelSelect.disabled = true;
+
+            if (brand && bikeData[brand]) {
+                const models = Object.keys(bikeData[brand]).filter(model => bikeData[brand][model].type === currentState.type);
+                models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model;
+                    option.textContent = model;
+                    modelSelect.appendChild(option);
+                });
+                modelSelect.disabled = false;
+            }
+            updateStateAndUI();
+        }
+
+        function populateComponents() {
+            const { brand, model } = currentState;
+            if (!brand || !model) {
+                componentsDiv.classList.add('hidden');
+                return;
+            }
+
+            const modelData = bikeData[brand][model];
+            currentState.basePrice = modelData.basePrice;
+            
+            componentSelects.forEach(select => {
+                const componentType = select.dataset.component;
+                const componentOptions = modelData.components[componentType];
+                select.innerHTML = '';
+                if (componentOptions && componentOptions.length > 0) {
+                    componentOptions.forEach(optionData => {
+                        const option = document.createElement('option');
+                        option.value = optionData.name;
+                        option.dataset.price = optionData.price;
+                        option.textContent = `${optionData.name} ${optionData.price > 0 ? `(+ ${formatPrice(optionData.price)})` : '(Standaard)'}`;
+                        select.appendChild(option);
+                    });
+                    select.parentElement.style.display = 'block';
+                } else {
+                    select.parentElement.style.display = 'none';
+                }
+            });
+            componentsDiv.classList.remove('hidden');
+        }
+
+        function updateStateAndUI() {
+            currentState.brand = brandSelect.value;
+            currentState.model = modelSelect.value;
+
+            if (!currentState.model) {
+                currentState.basePrice = 0;
+                currentState.components = {};
+                populateComponents();
+            } else {
+                populateComponents();
+                currentState.components = {};
+                componentSelects.forEach(select => {
+                    const componentType = select.dataset.component;
+                    if (select.parentElement.style.display !== 'none') {
+                        const selectedOption = select.options[select.selectedIndex];
+                        currentState.components[componentType] = { name: selectedOption.value, price: parseFloat(selectedOption.dataset.price || 0) };
+                    }
+                });
+            }
+            calculateAndDisplayTotal();
+            updateSummary();
+        }
+        
+        function resetSelections(keepBrand) {
+             modelSelect.innerHTML = '<option value="">-- Kies eerst een merk --</option>';
+             modelSelect.disabled = true;
+             componentsDiv.classList.add('hidden');
+             if (!keepBrand) {
+                 brandSelect.value = "";
+             }
+             currentState.model = null;
+             updateStateAndUI();
+        }
+
+        function calculateAndDisplayTotal() {
+            let total = currentState.basePrice;
+            Object.values(currentState.components).forEach(comp => { total += comp.price; });
+            totalPriceEl.textContent = formatPrice(total);
+            orderBtn.disabled = !currentState.model;
+        }
+
+        function updateSummary() {
+            if (!currentState.type) {
+                summaryContentEl.innerHTML = '<p>Kies een fietstype om te beginnen.</p>';
+                return;
+            }
+            if (!currentState.model) {
+                summaryContentEl.innerHTML = '<p>Kies een merk en model.</p>';
+                return;
+            }
+
+            let summaryHTML = `<div class="font-semibold text-gray-800">${currentState.brand} ${currentState.model}</div>`;
+            summaryHTML += `<p class="text-sm text-gray-500">Basisprijs: ${formatPrice(currentState.basePrice)}</p>`;
+            summaryHTML += '<ul class="mt-4 space-y-1 list-disc list-inside">';
+            Object.entries(currentState.components).forEach(([type, comp]) => {
+                if (comp.name) {
+                    summaryHTML += `<li><strong>${type.charAt(0).toUpperCase() + type.slice(1)}:</strong> ${comp.name}</li>`;
+                }
+            });
+            summaryHTML += '</ul>';
+            summaryContentEl.innerHTML = summaryHTML;
+        }
+
+        // --- EVENT LISTENERS ---
+        typeSelector.addEventListener('click', handleTypeSelection);
+        brandSelect.addEventListener('change', populateModels);
+        modelSelect.addEventListener('change', updateStateAndUI);
+        componentSelects.forEach(select => {
+            select.addEventListener('change', () => {
+                const componentType = select.dataset.component;
+                const selectedOption = select.options[select.selectedIndex];
+                currentState.components[componentType] = { name: selectedOption.value, price: parseFloat(selectedOption.dataset.price || 0) };
+                calculateAndDisplayTotal();
+                updateSummary();
+            });
+        });
+        
+        orderBtn.addEventListener('click', () => {
+            if (!currentState.model) return;
+            orderModal.classList.remove('hidden');
+        });
+        
+        closeModalBtn.addEventListener('click', () => {
+            orderModal.classList.add('hidden');
+        });
+
+
+        // --- INITIALISATIE ---
+        orderBtn.disabled = true;
+
+    </script>
+</body>
+</html>
